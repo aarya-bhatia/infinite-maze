@@ -2,9 +2,13 @@ from flask import Flask, render_template
 from pymongo import MongoClient
 import requests
 
-mongo = MongoClient('localhost', 27017)
-db = mongo["cs240-project-maze"]
-mgdb = db['mg']
+try:
+    mongo = MongoClient('localhost', 27017)
+    db = mongo["cs240-project-maze"]
+    mgdb = db['mg']
+except:
+    print("Could not connect to the database!")
+    exit(1)
 
 app = Flask(__name__)
 
@@ -67,6 +71,6 @@ def GET_maze_segment():
                     if validate_grid(num_rows, num_cols, grid):
                         return {"geom": response["geom"]}
         except:
-            mg.update_one({"_id": mg["_id"]}, {"$set": {"status", "error"}})
+            mgdb.update_one({"_id": mg["_id"]}, {"$set": {"status", "error"}})
 
     return {"error": "No servers are available"}, 500

@@ -1,5 +1,5 @@
-from maze.coord import Coord
-from maze.dir import DIR, get_direction
+from coord import Coord
+from dir import DIR, get_direction
 
 
 class Maze:

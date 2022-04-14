@@ -1,4 +1,4 @@
-from maze.coord import Coord
+from coord import Coord
 
 
 DIR = [(-1, 0), (0, 1), (1, 0), (0, -1)]
@@ -9,9 +9,18 @@ EAST = 2
 NORTH = 3
 
 
+def sgn(x):
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    else:
+        return 0
+
+
 def get_direction(first: Coord, second: Coord) -> int:
-    dx = second.col - first.col
-    dy = second.row - first.row
+    dx = sgn(second.col - first.col)
+    dy = sgn(second.row - first.row)
 
     for i, d in enumerate(DIR):
         if dx == d[0] and dy == d[1]:

@@ -1,7 +1,10 @@
+import sys
 from flask import Flask, jsonify
 from maze.random_mg import RandomMazeGenerator
 
 app = Flask(__name__)
+
+sys.path.append('../maze/')
 
 
 @app.route('/', methods=["GET"])
