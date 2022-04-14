@@ -67,3 +67,7 @@ Our middleware does the following validation on each request to `/generateSegmen
 - The middleware should accept maze data and user data from the frontend on each request to update the required information in the database.
 
 ## Features to Implement in Future
+
+1. I want to implement a user auth system to let users create accounts. We can then associate some data to their ID such as statistics about their lifetime using our app. This will make it more engaging for users to try the app and share their scores. For example, we can store information such as the total distanced travelled by the user. Later, we can award 'badges' to users who complete some challenges such as for exploring 'some distance' (like 10000px) of maze.
+   1. We can create use the following method to do so: The frontend will regularly ping the backend with the current displacement of the user, or on every request when generating a segment. The backend will update the information in the database for the user who is currently authenticated on the site.
+2. We want there to exist a camera system which moves the scree when we cross the edge of the window creating mazes. There screen should 'scroll' with the user into the next maze. This task is mostly a frontend related task. It would involve a fair amount of javascript.
