@@ -14,28 +14,33 @@ letterMap = ["...",
 
 
 class LetterMazeGenerator(MazeGenerator):
+    def __init__(self):
+        super().__init__(7, 7)
+
     def create(self):
-        w = len(letterMap[0])
-        offset = randint(0, 4)
+        offset = randint(0, 3)
 
-        for row in self.height:
-            for col in self.width:
-                if col < offset or col > offset + w or letterMap[row][col] == '.':
-                    self.maze.set_cell(Coord(row, col), 0x0)
-                else:
-                    self.maze.set_cell(Coord(row, col), 0xf)
+        for i in range(self.width * self.height):
+            self.maze.cells[i] = 0
 
-                    for index, dir in enumerate(DIR):
-                        dx = dir[0]
-                        dy = dir[1]
+        for row in range(7):
+            for col in range(3):
+                if letterMap[row][col] == '.':
+                    continue
 
-                        map_x = col - offset + dx
-                        map_y = row + dy
+                self.maze.set_cell(Coord(row, offset + col), 0xf)
 
-                        if letterMap[map_y][map_x] == 'x':
-                            # remove wall in this dir
-                            self.maze.set_cell(Coord(row, col), self.maze.get_cell(
-                                Coord(row, col)) & ~(1 << index))
+                for i in range(4):
+                    dir = DIR[i]
+
+                    dx = dir[0]
+                    dy = dir[1]
+
+                    x = col + dx
+                    y = row + dy
+
+                    if x >= 0 and x < 3 and y >= 0 and y < 7 and letterMap[y][x] == 'x':
+                        self.maze.remove_wall(Coord(row, offset + col), i)
 
         return self.maze
 
@@ -45,5 +50,10 @@ app = Flask(__name__)
 
 @app.route('/', methods=["GET"])
 def GET_maze_segment():
-    maze = LetterMazeGenerator(7, 7).create().encode()
+    maze = LetterMazeGenerator().create().encode()
     return jsonify({"geom": maze}), 200
+
+
+if __name__ == '__main__':
+    maze = LetterMazeGenerator().create()
+    print(maze.encode())
