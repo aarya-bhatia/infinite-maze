@@ -1,6 +1,6 @@
 import sys
 from flask import Flask, jsonify
-from maze.random_mg import RandomMazeGenerator
+from random_mg import RandomMazeGenerator
 
 app = Flask(__name__)
 

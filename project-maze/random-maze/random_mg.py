@@ -1,8 +1,8 @@
-from coord import Coord
-from dset import DSet
-from maze import Maze
-from dir import DIR, EAST, NORTH, SOUTH, WEST, get_direction
-from mg import MazeGenerator
+from maze.coord import Coord
+from maze.dset import DSet
+from maze.maze import Maze
+from maze.dir import DIR, EAST, NORTH, SOUTH, WEST, get_direction
+from maze.mg import MazeGenerator
 from random import randint, shuffle
 
 
