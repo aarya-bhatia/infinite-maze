@@ -1,13 +1,12 @@
-from maze.maze import MazeGen
 import sys
 from flask import Flask, jsonify
 from random import randint
-from ..maze import MazeGenerator
-from ..maze import DIR
-from ..maze import Coord
-from ..maze import Coord
 
 sys.path.append('../maze/')
+
+from maze import Coord
+from maze import DIR
+from maze import MazeGenerator
 
 letterMap = ["...",
              "xxx",
