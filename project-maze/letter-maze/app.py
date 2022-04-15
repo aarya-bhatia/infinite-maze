@@ -1,12 +1,8 @@
-import sys
 from flask import Flask, jsonify
 from random import randint
-
-sys.path.append('../maze/')
-
-from maze import Coord
-from maze import DIR
-from maze import MazeGenerator
+from maze.coord import Coord
+from maze.dir import DIR
+from maze.mg import MazeGenerator
 
 letterMap = ["...",
              "xxx",
@@ -45,8 +41,6 @@ class LetterMazeGenerator(MazeGenerator):
 
 
 app = Flask(__name__)
-
-sys.path.append('../maze/')
 
 
 @app.route('/', methods=["GET"])
