@@ -1,5 +1,10 @@
 # sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2
 
+Quick Links
+
+- API.md: https://github.com/cs240-illinois/sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2/blob/main/project-maze/API.md
+- MG.md: https://github.com/cs240-illinois/sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2/blob/main/project-maze/MG.md
+
 Final Project
 
 - maze gen
