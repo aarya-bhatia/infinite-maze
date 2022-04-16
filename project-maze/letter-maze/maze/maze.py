@@ -1,99 +1,92 @@
 from maze.coord import Coord
-from maze.dir import DIR, get_direction
+from maze.dir import dir_vec_arr, get_direction
 
 
 class Maze:
     def __init__(self, height, width) -> None:
+        """Initialise a maze with <height> rows and <width> columns with no walls"""
         self.height = height
         self.width = width
         self.cells = [0] * (height * width)
 
-    def set_cell(self, coord: Coord, value: int) -> None:
-        if not self.is_valid_coord(coord):
-            return
-
-        self.cells[self.get_index(coord)] = value
-
-    def get_cell(self, coord: Coord) -> int:
-        if not self.is_valid_coord(coord):
-            raise Exception("Invalid coord")
-
-        return self.cells[self.get_index(coord)]
-
-    def can_travel(self, current: Coord, dir: int) -> bool:
-        dx = DIR[dir][0]
-        dy = DIR[dir][1]
-
-        x = current.col + dx
-        y = current.row + dy
-
-        if x < 0 or x >= self.width:
+    def can_travel(self, current: Coord, direction: int) -> bool:
+        """Checks if we can travel from the cell at the current coord in the given direction"""
+        if not self.is_valid(current):
             return False
 
-        if y < 0 or y >= self.height:
+        dx, dy = dir_vec_arr[direction]
+        neighbor = current + Coord(dy, dx)
+
+        if not self.is_valid(neighbor):
             return False
 
         return True
 
-    def add_wall(self, currentCoord: Coord, dir: int) -> None:
-        if not self.is_valid_coord(currentCoord):
+    def add_wall(self, current: Coord, direction: int) -> None:
+        """Add a wall from the cell at current coord to the cell at the coord in the direction given, and vice versa"""
+        if not self.is_valid(current):
             return
 
-        dx = DIR[dir][0]
-        dy = DIR[dir][1]
+        dx, dy = dir_vec_arr[direction]
+        neighbor = current + Coord(dy, dx)
+        reverse_direction = (direction + 2) % 4
 
-        neighborCoord = Coord(currentCoord.row + dy, currentCoord.col + dx)
-
-        if not self.is_valid_coord(neighborCoord):
+        if not self.is_valid(neighbor):
             return
 
-        revDir = (dir + 2) % 4
+        self.cells[self.index(current)] |= (1 << direction)
+        self.cells[self.index(neighbor)] |= (1 << reverse_direction)
 
-        self.set_cell(currentCoord, self.get_cell(currentCoord) | (1 << dir))
-        self.set_cell(neighborCoord, self.get_cell(
-            neighborCoord) | (1 << revDir))
-
-    def remove_wall(self, currentCoord: Coord, dir: int) -> None:
-        if not self.is_valid_coord(currentCoord):
+    def remove_wall(self, current: Coord, direction: int) -> None:
+        """Remove the wall from the cell at current coord to the cell at the coord in the direction given, and vice versa"""
+        if not self.is_valid(current):
             return
 
-        dx = DIR[dir][0]
-        dy = DIR[dir][1]
+        dx, dy = dir_vec_arr[direction]
+        neighbor = current + Coord(dy, dx)
+        reverse_direction = (direction + 2) % 4
 
-        neighborCoord = Coord(currentCoord.row + dy, currentCoord.col + dx)
-
-        if not self.is_valid_coord(neighborCoord):
+        if not self.is_valid(neighbor):
             return
 
-        revDir = (dir + 2) % 4
-
-        self.set_cell(currentCoord, self.get_cell(currentCoord) & ~(1 << dir))
-        self.set_cell(neighborCoord, self.get_cell(
-            neighborCoord) & ~(1 << revDir))
+        self.cells[self.index(current)] &= ~(1 << direction)
+        self.cells[self.index(neighbor)] &= ~(1 << reverse_direction)
 
     def has_wall(self, first: Coord, second: Coord) -> bool:
-        dir = get_direction(first, second)
-        revDir = (dir + 2) % 4
+        """Check if there exist wall between cells at given coord"""
+        direction = get_direction(first, second)
+        firstCell = self.cells[self.index(first)]
 
-        firstCell = self.get_cell(first)
-        secondCell = self.get_cell(second)
+        if firstCell & (1 << direction) == 0:
+            return False
 
-        return firstCell & (1 << dir) and secondCell & (1 << revDir)
+        secondCell = self.cells[self.index(second)]
+        reverse_direction = (direction + 2) % 4
 
-    def is_valid_coord(self, coord: Coord) -> bool:
+        if secondCell & (1 << reverse_direction) == 0:
+            return False
+
+        return True
+
+    def is_valid(self, coord: Coord) -> bool:
+        """Checks if the cell given by coord is contained inside the maze."""
         return coord.row >= 0 and coord.row < self.height \
             and coord.col >= 0 and coord.col < self.width
 
     def size(self) -> int:
+        """Return the size of the maze"""
         return self.width * self.height
 
-    def get_index(self, coord: Coord) -> int:
+    def index(self, coord: Coord) -> int:
+        """Get the index of a cell in maze by given coord"""
         return coord.row * self.width + coord.col
 
-    def get_coord(self, index: int) -> Coord:
-        return Coord(index//self.width, index % self.height)
+    def coord(self, index: int) -> Coord:
+        """Get the coord of the cell at given index in the array"""
+        return Coord(index//self.width, index % self.width)
 
     def encode(self):
+        """Encode the maze into a string array by encoding each cell with a single hexadecimal digit."""
         res = []
 
         for row in range(self.height):
