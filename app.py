@@ -1,40 +1,21 @@
+from random import randint
 from flask import Flask, render_template
 from pymongo import MongoClient
+import util
 import requests
+from bson.objectid import ObjectId
+
+servers = []
 
 try:
     mongo = MongoClient('localhost', 27017)
     db = mongo["cs240-project-maze"]
-    mgdb = db['mg']
 except:
     print("Could not connect to the database!")
     exit(1)
 
 app = Flask(__name__)
 
-
-def validate_grid(num_rows, num_cols, grid):
-    if len(grid) != int(num_rows):
-        return False
-    for row in grid:
-        if len(row) != int(num_cols):
-            return False
-        for col in row:
-            if not((col >= '0' and col <= '9') or (col >= 'a' and col <= 'f') or (col >= 'A' and col <= 'F')):
-                return False
-
-    return True
-
-
-def has_available_size(num_rows, num_cols, mg):
-    accept_size = mg["accept_size"].split(",")
-
-    for size in accept_size:
-        dimensions = size.split(":")
-        if (dimensions[0] == "*" or dimensions[0] == num_rows) and (dimensions[1] == '*' or dimensions[1] == num_cols):
-            return True
-
-    return False
 
 # Route for "/" (frontend):
 
@@ -48,35 +29,39 @@ def GET_index():
 
 @app.route('/generateSegment', methods=["GET"])
 def GET_maze_segment():
+    num_rows = '7'
+    num_cols = '7'
 
-    maze = requests.get('http://localhost:24001/')
-    maze = maze.json()
+    if not servers:
+        docs = db.servers.find({"status": "available"})
 
-    return maze, 200
+        if docs:
+            for server in docs:
+                servers.append(server)
 
-    # num_rows = '7'
-    # num_cols = '7'
+    while len(servers) > 0:
+        r = randint(0, len(servers)-1)
+        server = servers[r]
+        servers.remove(server)
 
-    # docs = mgdb.find({"status": "available"})
+        url = server["URL"]
 
-    # for mg in docs:
-    #     url = mg["URL"]
+        if not util.has_available_size(num_rows, num_cols, server):
+            continue
 
-    #     if not has_available_size(num_rows, num_cols, mg):
-    #         continue
+        try:
+            response = requests.get(url)
 
-    #     try:
-    #         response = requests.get(url)
+            if response.status_code == 200:
+                response = response.json()
 
-    #         if response.status_code == 200:
-    #             response = response.json()
+                if "geom" in response:
+                    grid = response["geom"]
 
-    #             if "geom" in response:
-    #                 grid = response["geom"]
+                    if util.validate_grid(num_rows, num_cols, grid):
+                        return {"geom": response["geom"]}
+        except:
+            db.servers.update_one({"_id": ObjectId(server["_id"])}, {
+                                  "$set": {"status", "error"}})
 
-    #                 if validate_grid(num_rows, num_cols, grid):
-    #                     return {"geom": response["geom"]}
-    #     except:
-    #         mgdb.update_one({"_id": mg["_id"]}, {"$set": {"status", "error"}})
-
-    # return {"error": "No servers are available"}, 500
+    return {"error": "No servers are available"}, 500
