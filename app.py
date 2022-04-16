@@ -48,35 +48,29 @@ def GET_index():
 
 @app.route('/generateSegment', methods=["GET"])
 def GET_maze_segment():
+    num_rows = '7'
+    num_cols = '7'
 
-    maze = requests.get('http://localhost:24001/')
-    maze = maze.json()
+    docs = mgdb.find({"status": "available"})
 
-    return maze, 200
+    for mg in docs:
+        url = mg["URL"]
 
-    # num_rows = '7'
-    # num_cols = '7'
+        if not has_available_size(num_rows, num_cols, mg):
+            continue
 
-    # docs = mgdb.find({"status": "available"})
+        try:
+            response = requests.get(url)
 
-    # for mg in docs:
-    #     url = mg["URL"]
+            if response.status_code == 200:
+                response = response.json()
 
-    #     if not has_available_size(num_rows, num_cols, mg):
-    #         continue
+                if "geom" in response:
+                    grid = response["geom"]
 
-    #     try:
-    #         response = requests.get(url)
+                    if validate_grid(num_rows, num_cols, grid):
+                        return {"geom": response["geom"]}
+        except:
+            mgdb.update_one({"_id": mg["_id"]}, {"$set": {"status", "error"}})
 
-    #         if response.status_code == 200:
-    #             response = response.json()
-
-    #             if "geom" in response:
-    #                 grid = response["geom"]
-
-    #                 if validate_grid(num_rows, num_cols, grid):
-    #                     return {"geom": response["geom"]}
-    #     except:
-    #         mgdb.update_one({"_id": mg["_id"]}, {"$set": {"status", "error"}})
-
-    # return {"error": "No servers are available"}, 500
+    return {"error": "No servers are available"}, 500
