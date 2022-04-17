@@ -1,0 +1,6 @@
+{% extends 'base.html' %} {% block container %}
+<form action="/servers/add" method="POST">
+  <label for="URL">URL</label>
+  <input type="url" class="form-control" name="URL" />
+</form>
+{% endblock %}
