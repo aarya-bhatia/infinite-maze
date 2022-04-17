@@ -136,12 +136,15 @@ As you can see wee have two users and two maze generators registered to the db.
 
 ---
 
+## Middleware Generate Segment
+
 Our middleware does the following validation on each request to `/generateSegment`.
 
 - The middleware gets the list of servers that are currently available for use from the database.
 - We search this list to find a server that accepts 7x7 maze sizes and make a get request to the server. It returns a JSON response with the key "geom" containing the data for the maze. The data encoding is still the same. We have a list of "7" strings that each contain "7" hex digits. Each of those hex digits represent the positions of the walls for that cell. The North wall is at position 3, then East, South and West on position 0.
 - The middleware ensures that this format is followed. If the data is corrupted in any way, we change the status for this server to "error". At this point, we would like to notify the owner of the server that they have a issue. Therefore, we can add a field to the schema to hold owner name and email.
 - If all is okay, the request is forwarded to the frontend where it is rendered for the end user.
+- To ensure randomness to the maze generation, we manage a list of servers locally. While the list is not empty, we pull out a random server from this list and remove it from the list. We use this server to produce the maze, if it is valid (or try another). Once we exhaust this list, we fetch all available servers from the db again.
 
 ## Middleware Additions
 
