@@ -89,13 +89,22 @@
   <body>
     <div class="container-fluid my-2 py-2">
       <ul class="nav">
+        <li class="nav-item">
+          <a href="/" class="nav-link">Infinite Maze</a>
+        </li>
         {% if data['logged_in'] %} {% if data['username'] %}
         <li class="nav-item">@{{ data['username'] }}</li>
         {% endif %}
-        <a href="/logout" class="naav-lin">Logout</a>
+        <li class="nav-item">
+          <a href="/logout" class="nav-link">Logout</a>
+        </li>
         {% else %}
-        <a class="nav-link" href="/login">Login</a>
-        <a class="nav-link" href="/register">Register</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/register">Register</a>
+        </li>
         {% endif %}
       </ul>
     </div>

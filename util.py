@@ -25,5 +25,5 @@ def has_available_size(num_rows, num_cols, server):
     return False
 
 
-def hash(s):
-    return hashlib.md5(s).hexdigest()
+def hash(s: str) -> str:
+    return hashlib.md5(s.encode('utf-8')).hexdigest()

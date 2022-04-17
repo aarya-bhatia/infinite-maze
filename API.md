@@ -2,9 +2,15 @@
 
 ## Maze Generation
 
-![maze](resources/maze-logged-in.png)
+IM Frontend
 
-![maze](resources/maze-logged-out.png)
+For logged in users
+
+![maze](resources/maze-logged-in-new.png)
+
+For logged out users
+
+![maze](resources/maze-logged-out-new.png)
 
 The following information explains the classes and modules used for this project.
 
@@ -103,6 +109,12 @@ Maze
 }
 ```
 
+Below is a screenshot of the mongo shell displaying the data we currently have:
+
+![mongo shell screenshot](resources/mongo-shell-output.png)
+
+As you can see wee have two users and two maze generators registered to the db.
+
 ## Details
 
 - The Server collection will contain the records for the servers and endpoints for each maze generator that is registered to the database.
@@ -138,7 +150,21 @@ Our middleware does the following validation on each request to `/generateSegmen
 
 ## Authentication
 
-- We are currently building a system for authentication. We have two forms: one for registering a new user and the other to login. Both forms have corresponding middleware routes to create/fetch users. We also initialise a Flask session to store the user id and the 'logged_in' variable so that we can display different kind of frontend for users.
+- We currently have a simple system for authentication. We have two forms: one for registering a new user and the other to login. Both forms have corresponding middleware routes to create/fetch users. We also initialise a Flask session to store the user id and the 'logged_in' variable so that we can display different kind of frontend for users.
+- Our middleware handles validation of data for the /login and /register forms. In particular we check for the following conditions:
+  - Login
+    - We check if all the form fields are filled
+    - We check if a user exists with the given username
+    - If not, we check if a user exists with email is equal to the given username
+    - If yes, we check if the passwords match, when hashed to md5
+    - On success, we login the user and save their data in our session
+  - Register:
+    - We check if all the form fields are filled
+    - We check if the username contains only alphanumeric and underscore
+    - We check if the email matches our predefined regex pattern
+    - We check if the password is longer than 3 characters
+    - We check if there is no user with the given username (They must be unique)
+    - Finally we create the account and save the session data.
 
 Login Form
 

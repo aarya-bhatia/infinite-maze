@@ -7,10 +7,14 @@ import util
 import requests
 from bson.objectid import ObjectId
 from bson.json_util import loads, dumps
+import re
 
 load_dotenv()
 
 servers = []
+
+EMAIL_REGEX = re.compile(r"[^@\s]+@[^@\s]+\.[a-zA-Z0-9]+$")
+USERNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
 
 try:
     mongo = MongoClient('localhost', 27017)
@@ -34,17 +38,25 @@ def login():
         if not username or not password:
             return "Please fill in all fields...", 400
 
+        # query the db for a user with this username
         found = db.users.find_one({"username": username})
 
-        if found:
-            user = dumps(found)
-            print(user)
+        # If not found, query the db for a user with email=<username>:
+        if not found:
+            found = db.users.find_one({"email": username})
+
+            if not found:
+                return "Account not found", 400
+
+        # compare the passwords if user found
+        if util.hash(password) == found["password"]:
+            # save session data
             session['user_id'] = str(found["_id"])
             session['username'] = str(found["username"])
             session['logged_in'] = True
             return f"Account found: {found['username']}", 200
         else:
-            return "Account not found", 400
+            return "Passwords do not match! Please try again", 400
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -52,13 +64,56 @@ def register():
     if request.method == "GET":
         return render_template("register.html", data={"logged_in": session["logged_in"]})
     else:
-        return "Todo", 200
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        # some validation
+
+        if not username or not email or not password:
+            return "Please fill in all fields to register...", 400
+
+        if len(password) < 3:
+            return "Password too short! Please use a password longer than 3 characters.", 400
+
+        # regex validation
+
+        if not USERNAME_REGEX.match(username):
+            return "Please enter a username that contain alphanumeric or underscore as the only characters.", 400
+
+        if not EMAIL_REGEX.match(email):
+            return "Please enter a valid email address!", 400
+
+        # username should be unique so check for any duplicate account
+        found = db.users.find_one({"username": username})
+        if found:
+            return "This username is taken! Please try using a different username...", 400
+
+        # Create new account
+
+        new_user = db.users.insert_one({
+            "username": username,
+            "email": email,
+            "password": util.hash(password)
+        })
+
+        # save session data
+
+        session["user_id"] = str(new_user.inserted_id)
+        session["username"] = username
+        session["logged_in"] = False
+
+        # return to homepage
+
+        return redirect('/')
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
+    # delete session data
+    session.clear()
     session['logged_in'] = False
-    session.pop('user')
+    # return to index
     return redirect('/')
 
 
