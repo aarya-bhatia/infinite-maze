@@ -1,5 +1,7 @@
 # sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2
 
+![maze](resources/maze-logged-out.png)
+
 Quick Links
 
 - Read about our API Here: [API.md](API.md)

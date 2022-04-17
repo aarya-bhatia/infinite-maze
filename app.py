@@ -26,10 +26,7 @@ app.secret_key = os.environ['SECRET_KEY']
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        data = {
-            "session": loads(session)
-        }
-        return render_template("login.html", data=data)
+        return render_template("login.html", data={"logged_in": session["logged_in"]})
     else:
         username = request.form['username']
         password = request.form['password']
@@ -43,7 +40,7 @@ def login():
             user = dumps(found)
             print(user)
             session['user_id'] = str(found["_id"])
-            session['username'] = found["username"]
+            session['username'] = str(found["username"])
             session['logged_in'] = True
             return f"Account found: {found['username']}", 200
         else:
@@ -53,10 +50,7 @@ def login():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        data = {
-            "session": session
-        }
-        return render_template("register.html", data=data)
+        return render_template("register.html", data={"logged_in": session["logged_in"]})
     else:
         return "Todo", 200
 
@@ -68,12 +62,17 @@ def logout():
     return redirect('/')
 
 
+@app.route('/server-registration', methods=["GET", "POST"])
+def serverRegistration():
+    if request.method == "GET":
+        return render_template('server-registration.html', data={"logged_in": session["logged_in"]})
+    else:
+        return "Not implemented", 200
+
+
 @app.route('/', methods=["GET"])
 def GET_index():
-    data = {
-        "session": session
-    }
-    return render_template("index.html", data=data)
+    return render_template("index.html",  data={"logged_in": session["logged_in"]})
 
 
 @app.route('/generateSegment', methods=["GET"])
@@ -112,6 +111,6 @@ def GET_maze_segment():
                         return {"geom": response["geom"]}
         except:
             db.servers.update_one({"_id": ObjectId(server["_id"])}, {
-                                  "$set": {"status", "error"}})
+                                  "$set": {"status": "error"}})
 
     return {"error": "No servers are available"}, 500

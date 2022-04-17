@@ -89,8 +89,8 @@
   <body>
     <div class="container-fluid my-2 py-2">
       <ul class="nav">
-        {% if data.session.logged_in %} {% if username in data.session.user %}
-        <li class="nav-item">@{{ data.session.user.username }}</li>
+        {% if data['logged_in'] %} {% if data['username'] %}
+        <li class="nav-item">@{{ data['username'] }}</li>
         {% endif %}
         <a href="/logout" class="naav-lin">Logout</a>
         {% else %}

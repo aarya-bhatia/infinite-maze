@@ -2,6 +2,10 @@
 
 ## Maze Generation
 
+![maze](resources/maze-logged-in.png)
+
+![maze](resources/maze-logged-out.png)
+
 The following information explains the classes and modules used for this project.
 
 For our backend, we follow an OOP approach to desgin. We have created a base "maze" package containing some helper modules and a "MazeGenerator" base class that all maze generators override.
@@ -135,6 +139,14 @@ Our middleware does the following validation on each request to `/generateSegmen
 ## Authentication
 
 - We are currently building a system for authentication. We have two forms: one for registering a new user and the other to login. Both forms have corresponding middleware routes to create/fetch users. We also initialise a Flask session to store the user id and the 'logged_in' variable so that we can display different kind of frontend for users.
+
+Login Form
+
+![maze](resources/login-form.png)
+
+Register Form
+
+![maze](resources/register-form.png)
 
 ## Frontend Changes
 
