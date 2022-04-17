@@ -1,5 +1,5 @@
 from random import randint
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from pymongo import MongoClient
 import util
 import requests
@@ -17,18 +17,30 @@ except:
 app = Flask(__name__)
 
 
-# Route for "/" (frontend):
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html"), 200
+    else:
+        return "OK", 200
+
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("register.html"), 200
+    else:
+        return "OK", 200
 
 
 @app.route('/', methods=["GET"])
 def GET_index():
     return render_template("index.html")
 
-# Route for maze generation:
-
 
 @app.route('/generateSegment', methods=["GET"])
 def GET_maze_segment():
+    """Route for maze generation"""
     num_rows = '7'
     num_cols = '7'
 
