@@ -2,34 +2,14 @@
 
 Quick Links
 
-- API.md: https://github.com/cs240-illinois/sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2/blob/main/project-maze/API.md
-- MG.md: https://github.com/cs240-illinois/sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2/blob/main/project-maze/MG.md
+- Read about our API Here: [API.md](API.md)
+- Read about our Maaze Generators Here: [MG.md](MG.md)
 
-Final Project
+## Todo
 
-- maze gen
-- think of design and document
-- no need to implement yet
 - persistence
 - footprints
 - non 7x7 grid
-- colors?
+- colors
 - blocks light up when crossed
 - multiple users
-
-Week 2
-
-- implement some features
-
-Week 3
-
-- work together class repo with best design and finish project
-
-my Ideas
-
-- total distance travelled user points badges
-- camera to move total maze when crossing boundary of window
-
-- No grades for frontend! :)
-
----
