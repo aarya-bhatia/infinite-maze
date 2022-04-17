@@ -1,6 +1,6 @@
 # sp22_cs240_aaryab2-atanwar2_aaryab2-atanwar2
 
-![maze](resources/maze-logged-out.png)
+![maze](resources/maze-logged-out-new.png)
 
 Quick Links
 
