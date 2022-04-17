@@ -1,9 +1,14 @@
+import os
 from random import randint
-from flask import Flask, render_template, request
+from dotenv import load_dotenv
+from flask import Flask, redirect, render_template, render_template_string, request, session
 from pymongo import MongoClient
 import util
 import requests
 from bson.objectid import ObjectId
+from bson.json_util import loads, dumps
+
+load_dotenv()
 
 servers = []
 
@@ -15,27 +20,60 @@ except:
     exit(1)
 
 app = Flask(__name__)
+app.secret_key = os.environ['SECRET_KEY']
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html"), 200
+        data = {
+            "session": loads(session)
+        }
+        return render_template("login.html", data=data)
     else:
-        return "OK", 200
+        username = request.form['username']
+        password = request.form['password']
+
+        if not username or not password:
+            return "Please fill in all fields...", 400
+
+        found = db.users.find_one({"username": username})
+
+        if found:
+            user = dumps(found)
+            print(user)
+            session['user_id'] = str(found["_id"])
+            session['username'] = found["username"]
+            session['logged_in'] = True
+            return f"Account found: {found['username']}", 200
+        else:
+            return "Account not found", 400
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return render_template("register.html"), 200
+        data = {
+            "session": session
+        }
+        return render_template("register.html", data=data)
     else:
-        return "OK", 200
+        return "Todo", 200
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session['logged_in'] = False
+    session.pop('user')
+    return redirect('/')
 
 
 @app.route('/', methods=["GET"])
 def GET_index():
-    return render_template("index.html")
+    data = {
+        "session": session
+    }
+    return render_template("index.html", data=data)
 
 
 @app.route('/generateSegment', methods=["GET"])

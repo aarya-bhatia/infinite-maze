@@ -1,3 +1,6 @@
+import hashlib
+
+
 def validate_grid(num_rows, num_cols, grid):
     if len(grid) != int(num_rows):
         return False
@@ -20,3 +23,7 @@ def has_available_size(num_rows, num_cols, server):
             return True
 
     return False
+
+
+def hash(s):
+    return hashlib.md5(s).hexdigest()
