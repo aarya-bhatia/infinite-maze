@@ -1,41 +1,11 @@
-<html>
-  <head>
-    <title>Login</title>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
-      crossorigin="anonymous"
-    />
-  </head>
-  <body>
-    <div class="container-fluid my-2 py-2">
-      <ul class="nav">
-        <a class="nav-link" href="/login">Login Form</a>
-        <a class="nav-link" href="/register">Register Form</a>
-      </ul>
-    </div>
-    <hr />
-    <div class="container mt-2 py-2">
-      <form action="/login" method="post">
-        <label for="username">Username</label>
-        <input class="form-control" type="text" name="username" required />
-        <br />
-        <label for="password">Password</label>
-        <input class="form-control" type="password" name="password" required />
-        <br />
-        <input
-          class="btn btn-primary"
-          name="login"
-          type="submit"
-          value="Submit"
-        />
-      </form>
-    </div>
-  </body>
-</html>
+{% extends 'base.html' %} {% block container %}
+<form action="/login" method="post">
+  <label for="username">Username</label>
+  <input class="form-control" type="text" name="username" required />
+  <br />
+  <label for="password">Password</label>
+  <input class="form-control" type="password" name="password" required />
+  <br />
+  <input class="btn btn-primary" name="login" type="submit" value="Submit" />
+</form>
+{% endblock %}
