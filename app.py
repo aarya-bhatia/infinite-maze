@@ -23,6 +23,27 @@ except:
     print("Could not connect to the database!")
     exit(1)
 
+def init():
+    if db.servers.count_documents({}) == 0:
+        server0 = {
+            "URL": "http://localhost:24001",
+            "description": "Letter maze generator",
+            "status": "available",
+            "owner_name": "Aarya",
+            "owner_email": "aarya.bhatia1678@gmail.com",
+            "accept_size": "*:*"
+        }
+
+        inserted = db.servers.insert_one(server0)
+
+        if inserted:
+            print("Served added: ", str(inserted.inserted_id))
+    else:
+        print("Server :24001 exists")
+
+
+init()
+
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
 
