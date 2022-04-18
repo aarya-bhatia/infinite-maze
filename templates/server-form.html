@@ -1,6 +1,8 @@
 {% extends 'base.html' %} {% block container %}
-<h2 class="display-4">Register Server Form</h2>
-<form action="/servers/add" method="POST">
+<h2 class="display-4">{{ data.title }}</h2>
+<form action="/server-registration" method="POST">
+  <input type="text" name="_id" id="_id" value="{{ data.server._id }}" hidden />
+
   <div class="form-group">
     <input
       type="url"
@@ -48,8 +50,8 @@
   <div class="form-group">
     <input
       type="email"
-      name="owner_emai"
-      id="owner_emai"
+      name="owner_email"
+      id="owner_email"
       class="form-control"
       placeholder="Owner Email"
       value="{{ data.server.owner_email }}"
@@ -61,10 +63,14 @@
       type="text"
       name="accept_size"
       id="accept_size"
-      placeholder="Accept-Size"
+      placeholder="Accept-Size(Leave blank to accept any size)"
       class="form-control"
       value="{{ data.server.accept_size }}"
     />
+  </div>
+
+  <div class="form-group">
+    <input type="submit" class="btn btn-primary" />
   </div>
 </form>
 {% endblock %}

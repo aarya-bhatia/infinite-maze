@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from random import randint
 from dotenv import load_dotenv
@@ -139,34 +140,102 @@ def logout():
     return redirect('/')
 
 
+@app.route('/server/edit/<server_id>', methods=["GET"])
+def EditServer(server_id):
+    server = db.servers.find_one({"_id": ObjectId(server_id)})
+    if not server:
+        return "Server not found", 400
+
+    # print(dumps(server))
+    print(server)
+
+    return render_template('server-form.html', data={
+        "title": "Edit Server Form",
+        "logged_in": session["logged_in"],
+        "server": server
+    })
+
+
+@app.route('/server/delete/<server_id>', methods=["GET"])
+def DeleteServer(server_id):
+    if db.servers.delete_one({"_id": ObjectId(server_id)}):
+        return redirect('/servers')
+
+
 @app.route('/server-registration', methods=["GET", "POST"])
-def serverRegistration():
+def RegisterServer():
     if request.method == "GET":
-        return render_template('server-registration.html', data={"logged_in": session["logged_in"]})
+        return render_template('server-form.html',
+                               data={"title": "Register Server Form",
+                                     "logged_in": session["logged_in"], "server": {}})
     else:
-        return "Not implemented", 200
+        # url, description, status, owner_name, owner_email, accept_size
+        id = request.form['_id']
+        url = request.form['URL']
+        description = request.form['description']
+        status = request.form['status'] or 'available'
+        owner_name = request.form['owner_name']
+        owner_email = request.form['owner_email']
+        accept_size = request.form['accept_size'] or '*:*'
+
+        if not url:
+            return "URL cannot be empty...", 400
+
+        if id:
+            # UPDATE EXISTING SERVER
+            server = db.servers.update_one(
+                {
+                    "_id": ObjectId(id)
+                },
+                {
+                    "$set": {
+                        "date": datetime.now(),
+                        "URL": url,
+                        "description": description,
+                        "status": status,
+                        "owner_name": owner_name,
+                        "owner_email": owner_email,
+                        "accept_size": accept_size
+                    }
+                })
+
+            if not server:
+                return "Error while updating server!", 400
+        else:
+            # CREATE NEW SERVER
+            server = db.servers.insert_one({
+                "date": datetime.now(),
+                "URL": url,
+                "description": description,
+                "status": status,
+                "owner_name": owner_name,
+                "owner_email": owner_email,
+                "accept_size": accept_size
+            })
+
+            if not server:
+                return "Error while creating server!", 400
+
+        return redirect('/servers')
 
 
-@app.route('/servers', methods=['GET', 'POST'])
-def serverDashboard():
-    if request.method == "GET":
-        server_list = db.servers.find()
-        if server_list:
-            server_list = list(server_list)
-            return render_template('servers.html', data={"logged_in": session["logged_in"], "servers": server_list})
-    else:
-        return "Not implemented", 200
+@ app.route('/servers', methods=['GET'])
+def FindServers():
+    server_list = db.servers.find()
+    if server_list:
+        server_list = list(server_list)
+        return render_template('servers.html', data={"logged_in": session["logged_in"], "servers": server_list})
 
-    return "Error", 500
+    return "Cannot find servers", 500
 
 
-@app.route('/', methods=["GET"])
+@ app.route('/', methods=["GET"])
 def GET_index():
     print(session)
     return render_template("index.html",  data={"logged_in": session["logged_in"]})
 
 
-@app.route('/generateSegment', methods=["GET"])
+@ app.route('/generateSegment', methods=["GET"])
 def GET_maze_segment():
     """Route for maze generation"""
     num_rows = '7'

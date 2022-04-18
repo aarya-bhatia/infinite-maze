@@ -4,6 +4,7 @@
 <div class="display-4">Servers</div>
 <table class="table">
   <tr>
+    <th>Date</th>
     <th>URL</th>
     <th>Status</th>
     <th>Owner</th>
@@ -12,15 +13,16 @@
   </tr>
   {% for server in data.servers %}
   <tr>
+    <td>{{ server.date }}</td>
     <td>{{ server.URL }}</td>
     <td>{{ server.status }}</td>
     <td>{{ server.owner_name }}</td>
     <td>{{ server.description }}</td>
     <td>
-      <a href="/servers/delete/{{ server._id }}" class="btn btn-danger"
+      <a href="/server/delete/{{ server._id }}" class="btn btn-danger"
         >Delete</a
       >
-      <a href="/servers/edit/{{ server._id }}" class="btn btn-danger">Edit</a>
+      <a href="/server/edit/{{ server._id }}" class="btn btn-danger">Edit</a>
     </td>
   </tr>
   {% endfor %}
