@@ -69,6 +69,29 @@ class RandomMazeGenerator(MazeGenerator):
         return self.maze
 
 
+def expandIntoLargerMaze(maze: Maze, new_height, new_width):
+    if maze.width > new_width or maze.height > new_height:
+        return maze
+
+    new_maze = Maze(new_height, new_width)
+    x_off = (new_width - maze.width) // 2
+    y_off = (new_height - maze.height) // 2
+
+    for i in range(new_maze.size()):
+        new_maze.cells[i] = 0
+
+    for row in range(maze.height):
+        for col in range(maze.width):
+            new_maze.cells[new_maze.index(
+                Coord(row + y_off, col + x_off))] = maze.cells[maze.index(Coord(row, col))]
+
+    return new_maze
+
+
 if __name__ == '__main__':
-    maze = RandomMazeGenerator(7, 7).create()
+    height = randint(3, 7)
+    width = randint(3, 7)
+    maze = RandomMazeGenerator(height, width).create()
+    print("Height:"+str(height)+" Width:"+str(width))
     print(maze.encode())
+    maze = expandIntoLargerMaze(maze, 7, 7)
