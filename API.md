@@ -28,7 +28,7 @@ For our backend, we follow an OOP approach to desgin. We have created a base "ma
   - A maze class to represent a single maze instance.
   - A maze stores a list of cells. The values of the cell correspond to the walls the cell has i.e. if the 1st element of the list is 0b1000, the cell #1 i.e. the cell at (1,0) has a wall in the North side.
   - The maze also stores the no. of rows and cols as the 'height' and 'width' data member.
-  - The list index is mapped to the 2d coord using the bijective function `(row,col) --> row * width + col`, and vice versa: `coord --> (coord // width, coord % height)`.
+  - The list index is mapped to the 2d coord using the bijective function `(row,col) --> row * width + col`, and vice versa: `coord --> (coord // width, coord % width)`.
   - The maze provides functions to add and remove walls from a cell identified by a coordinate (row, column). The set_cell and get_cell functions internally update the encoding of the cell in the array to match with the state of the maze. There are several other functions that are useful, such as the `is_valid_coord` function which checks if a coord is contained in the maze.
   - The encode function can convert the array into an encoded form, that is used by the backend to send as a response.
 - mg.py/MazeGenerator:
