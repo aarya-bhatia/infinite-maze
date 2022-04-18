@@ -122,7 +122,7 @@ def register():
 
         session["user_id"] = str(new_user.inserted_id)
         session["username"] = username
-        session["logged_in"] = False
+        session["logged_in"] = True
 
         # return to homepage
 
@@ -148,6 +148,7 @@ def serverRegistration():
 
 @app.route('/', methods=["GET"])
 def GET_index():
+    print(session)
     return render_template("index.html",  data={"logged_in": session["logged_in"]})
 
 
