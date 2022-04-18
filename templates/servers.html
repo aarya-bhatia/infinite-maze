@@ -1,6 +1,7 @@
 {% extends 'base.html' %} {% block container %}
-<div class="display-4">Servers</div>
 <a href="/server-registration" class="btn btn-info">Register New Server</a>
+<hr />
+<div class="display-4">Servers</div>
 <table class="table">
   <tr>
     <th>URL</th>
@@ -16,8 +17,10 @@
     <td>{{ server.owner_name }}</td>
     <td>{{ server.description }}</td>
     <td>
-      <a href="/servers/delete/{{ server._id }}" class="btn-danger">Delete</a>
-      <a href="/servers/edit/{{ server._id }}" class="btn-danger">Edit</a>
+      <a href="/servers/delete/{{ server._id }}" class="btn btn-danger"
+        >Delete</a
+      >
+      <a href="/servers/edit/{{ server._id }}" class="btn btn-danger">Edit</a>
     </td>
   </tr>
   {% endfor %}

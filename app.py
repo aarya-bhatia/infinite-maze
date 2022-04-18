@@ -23,6 +23,7 @@ except:
     print("Could not connect to the database!")
     exit(1)
 
+
 def init():
     if db.servers.count_documents({}) == 0:
         server0 = {
@@ -144,6 +145,19 @@ def serverRegistration():
         return render_template('server-registration.html', data={"logged_in": session["logged_in"]})
     else:
         return "Not implemented", 200
+
+
+@app.route('/servers', methods=['GET', 'POST'])
+def serverDashboard():
+    if request.method == "GET":
+        server_list = db.servers.find()
+        if server_list:
+            server_list = list(server_list)
+            return render_template('servers.html', data={"logged_in": session["logged_in"], "servers": server_list})
+    else:
+        return "Not implemented", 200
+
+    return "Error", 500
 
 
 @app.route('/', methods=["GET"])
