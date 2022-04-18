@@ -51,3 +51,12 @@ Local Configurations
   - Add the line `FLASK_RUN_PORT=24000` to project-maze/random-maze/.env
   - Add the line `FLASK_RUN_PORT=24001` to project-maze/letter-maze/.env
   - Add the line `SECRET_KEY=<Random Bytes>` to project-maze/.env, where the &lt;Random Bytes&gt; can be any string of bytes, used to initialise a Flask Session.
+
+## IMAGE GALLERY
+
+After creating our maze generators, below are some screenshots of the different mazes generated on the frontend. In the next version of our app, we will develop the maze-persistence feature as described in the API.md documentation.
+
+![Gallery Image 1](resources/im-gallery-1.png)
+![Gallery Image 2](resources/im-gallery-2.png)
+![Gallery Image 3](resources/im-gallery-3.png)
+![Gallery Image 4](resources/im-gallery-4.png)

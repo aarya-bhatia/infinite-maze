@@ -1,16 +1,34 @@
 # Maze Generators
 
-## Letter Maze Generator
+We have two maze generators called 'Custom Maze Generator' and 'Random Maze Generator'. Earlier the 'Custom Maze Generator' was called 'Letter Maze Generator' (if you spot this on any documentation), but we extended our class into a more dynamic version of itself and renamed is Custom Maze Generator! Both our maze generators share modules defined in the 'maze' directory. We have copied this directory into both of our maze generator's directories. This package contains the modules 'ccord.py', 'dir.py', 'dset.py', 'maze.py' and 'mg.py' which are at the bottom of this page. The next section will explain our maze generators.
 
-This class builds a maze in the shape of the letter I using a 'Letter Map'. Some values in this class are currently hard-coded, but it can be extended into something dynamic. The letter map specifies the inner shape of I using an array of strings. Each string represents one row of the letter and contains either a '.' or a 'x'. A x means that the position belongs to the boundary of the letter, but a dot means that there is blank space. Since we only specified 3 columns for the letter I, the rest of the columns for the 7x7 maze can be varied using a random 'offset'. The way our create function generates this maze is that, we iterate over the letter map array and at every 'x', we add a wall to that cell in each direction where there is a valid cell and there is no adjacent 'x' in the letter map. That is so we outline the boundary of the shape but not fill in. The offset for this class can be specified through the constructor. By default, we use a random offset between a range \[0,4\].
+## Custom Maze Generator
+
+**Path**: `project-maze/custom-maze/`
+
+- The custom maze generator creates a maze using a pattern or 'letter map'. The letter map is an array of strings where each string represents one row of the maze and each character of the string represents the particular column of the maze. The string contains either a '.' or a 'x'. A 'x' means that the position belongs to the boundary of the letter, but a dot means that there is blank space. We have several predefined letter map patterns as you can see in the following screenshot:
+
+![Letter Map Patterns](resources/letter-maps.png)
+
+Therefore, the dots represent blank space and the x's represent the boundary of the shape to trace out. The maze creates walls in the positions labelled as x while leaving the position with dots empty.
+
+The following modification allows us to create different variations with the same letter pattern: Our patterns can have arbitary height and width. We scale the maze up to a 7x7 maze by filling the rest of the space with empty space. Our class contains a 'offset' variable in both directions (x and y) which is picked randomly, so that the full width and height of the maze is as required. Using this offset and letter pattern, the create() function builds a custom maze scaled up to the required dimensions.
+
+The way our create function generates this maze is that, we iterate over the letter map array and at every 'x', we add a wall to that cell in any of the 4 directions where there is a valid cell in the full-maze and there is no adjacent 'x' in the letter map. That is so we outline the boundary of the shape but not fill in.
+
+For example, if the letter pattern had a x in position (0,0), we would add a WEST side wall if there was an empty column before column 0 of the inner-maze and we would add a NORTH side wall if there was an empty row above the inner-maze, in the full-sized maze.
 
 ## Random Maze Generator
+
+**Path**: `project-maze/random-maze/`
 
 The random maze generator class works on a Union-rank algorithm which uses a Disjoint set data structure, implemented in the maze/dset.py file. The union-set algorithm is used for cycle detection in our random maze.
 
 The RandomMazeGenrator class which is a subclass of the MazeGenerator creates a maze by breaking random walls until all cells are connected to each other. We partition the grid into single-cell sets. As we join any two cells by removing their walls, the cells merge into a bigger set. When all the cells are merged together, we have successfully finished the algorithm. This function ensures that the maze will be solvable and every cell has a path to every other cell. In addition to that, we create 4 random exits on all 4 sides of the maze.
 
-### maze
+As an addition to this class we now have a function called `expandIntoLargerMaze` in the file `project-maze/random-maze/random_mg.py` that allows us to expand a maze into a larger maze by filling in the outer rows and columns with blank space evenly on all sides of the inner-maze.
+
+## Package: maze
 
 - coord.py/Coord
   - A class to represent coordinates or positions in the maze by a row and column
@@ -29,3 +47,9 @@ The RandomMazeGenrator class which is a subclass of the MazeGenerator creates a 
   - Base class for maze generators.
   - creates a maze instance in the constructor
   - all subclasses override the create() function which returns a maze
+
+Testing:
+
+We have a test_maze.py file to test basic operations of the maze and conversion of coordinates from 1d to 2d array.
+
+![Tests screenshot](resources/maze-tests.png)
