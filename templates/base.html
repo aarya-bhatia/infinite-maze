@@ -19,72 +19,33 @@
     ></script>
 
     <title>CS 240: Infinite Maze</title>
-    <style>
-      .w {
-        height: 20px;
-        width: 20px;
-        display: inline-block;
-      }
 
-      .w span {
-        color: blue;
-        font-size: 16px;
-        position: relative;
-        top: -5px;
-      }
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/index.css' ) }}"
+    />
 
-      .maze-row {
-        height: 20px;
-      }
-
-      /* xxx1 */
-      .w1,
-      .w3,
-      .w5,
-      .w7,
-      .w9,
-      .wb,
-      .wd,
-      .wf {
-        border-left: solid 2px black;
-      }
-
-      /* xx1x => 2, 3, 6, 7, 10, 11, 14, 15 */
-      .w2,
-      .w3,
-      .w6,
-      .w7,
-      .wa,
-      .wb,
-      .we,
-      .wf {
-        border-bottom: solid 2px black;
-      }
-
-      /* x1xx => 4, 5, 6, 7, 12, 13, 14, 15 */
-      .w4,
-      .w5,
-      .w6,
-      .w7,
-      .wc,
-      .wd,
-      .we,
-      .wf {
-        border-right: solid 2px black;
-      }
-
-      /* 1xxx */
-      .w8,
-      .w9,
-      .wa,
-      .wb,
-      .wc,
-      .wd,
-      .we,
-      .wf {
-        border-top: solid 2px black;
-      }
-    </style>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ url_for('static', filename='favicon_io/apple-touch-icon.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', filename='favicon_io/favicon-32x32.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{url_for('static',filename='favicon_io/favicon-16x16.png')}}"
+    />
+    <link
+      rel="manifest"
+      href="{{url_for('static', filename='favicon_io/site.webmanifest')}}"
+    />
   </head>
   <body>
     <div class="container-fluid my-2 py-2">

@@ -183,6 +183,10 @@ Register Form
 - We added a jinja-block called container in the html body in our 'base.html' file, within a div.container tag. This is where all the content will be placed. The 'base.html' file also container the header, links, external styles, and a simple nav.
 - The 'index/html' now extends the base.html file and injects its content in the block we defined.
 - Our other html pages follow the same approach, where we extend the base file and surround the code in the block tags. We are also able to use jinja syntax to display information sent from the flask app. For logged in users we show a logout link on the nav while for the other users we show a 'login' and 'register' link! The flask session lets us do this.
+- We further organised the project structure and created a 'static' directory in the root directory for all css, javascript files. We added a favicon folder to show a CS240 favicon on the website too! We used the Flask 'url_for' function to link to all the static files in our templates.
+  - static/styles/index.css: stylesheet
+  - static/js/index.js: javascript
+  - static/favicon_io: favicon and webmanifest
 
 ## More Features
 
