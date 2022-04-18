@@ -26,14 +26,17 @@
   </div>
 
   <div class="form-group">
-    <input
+    <select
       type="text"
       name="status"
       id="status"
       class="form-control"
       placeholder="Status"
       value="{{ data.server.status }}"
-    />
+    >
+      <option value="available" {% if data.server.status=='available' %} selected {% endif %}>Available</option>
+      <option value="error"  {% if data.server.status=='error' %} selected {% endif %}>Error</option>
+    </select>
   </div>
 
   <div class="form-group">

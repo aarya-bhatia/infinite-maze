@@ -4,16 +4,19 @@
 <div class="display-4">Servers</div>
 <table class="table">
   <tr>
-    <th>Date</th>
+    <th>Date Created</th>
+    <th>Date Modified</th>
     <th>URL</th>
     <th>Status</th>
     <th>Owner</th>
     <th>Description</th>
     <th>Action</th>
+    <th></th>
   </tr>
   {% for server in data.servers %}
   <tr>
-    <td>{{ server.date }}</td>
+    <td>{{ server.date_created }}</td>
+    <td>{{ server.date_modified }}</td>
     <td>{{ server.URL }}</td>
     <td>{{ server.status }}</td>
     <td>{{ server.owner_name }}</td>
@@ -22,6 +25,8 @@
       <a href="/server/delete/{{ server._id }}" class="btn btn-danger"
         >Delete</a
       >
+    </td>
+    <td>
       <a href="/server/edit/{{ server._id }}" class="btn btn-danger">Edit</a>
     </td>
   </tr>

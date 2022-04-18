@@ -189,7 +189,7 @@ def RegisterServer():
                 },
                 {
                     "$set": {
-                        "date": datetime.now(),
+                        "date_modified": datetime.now(),
                         "URL": url,
                         "description": description,
                         "status": status,
@@ -203,8 +203,11 @@ def RegisterServer():
                 return "Error while updating server!", 400
         else:
             # CREATE NEW SERVER
+            now = datetime.now()
+
             server = db.servers.insert_one({
-                "date": datetime.now(),
+                "date_created": now,
+                "date_modified": now,
                 "URL": url,
                 "description": description,
                 "status": status,

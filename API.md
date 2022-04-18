@@ -2,15 +2,7 @@
 
 ## Maze Generation
 
-IM Frontend
-
-For logged in users
-
-![maze](resources/maze-logged-in-new.png)
-
-For logged out users
-
-![maze](resources/maze-logged-out-new.png)
+![maze](resources/im-gallery-1.png)
 
 The following information explains the classes and modules used for this project.
 
@@ -20,21 +12,23 @@ For our backend, we follow an OOP approach to desgin. We have created a base "ma
 
 - coord.py/Coord
   - A class to represent coordinates or positions in the maze by a row and column
-- dir.py/DIR: contains a fixed array of 2-dimensional tuples with useful property:
-  - Firstly, the i-th index of the array corresponds with the direction (North/South/East/West) which encodes the i-th bit of the cell in the maze. For example, if a cell has a north wall it might have a value of `0b1000`, which is the hex digit 8. So, the North bit is the third bit of this number. Therefore, NORTH is also the third member of the array. If we know which index of the array the direction is in, we can find out how to encode a cell by simply `1 << i` where i is the index.
+- dir.py/dir_vec_arr: contains a fixed array of 2-dimensional tuples with useful property:
+  - The values in this array represent the direction vectors for each of the four directions that the user can move in through the maze.
+  - We strategically set the array-index of a direction to the number that is used to encode the cell. The i-th index of the array corresponds with the direction (North/South/East/West) which encodes the i-th bit of the cell in the maze. _For example_, if a cell has a north wall it might have a value of `0b1000`, which is the hex digit 8. So, the North bit is the third bit of this number. Therefore, NORTH is also the third member of the array. If we know which index of the array the direction is in, we can find out how to encode a cell by simply doing `1 << i` for the index i.
   - The actual numbers in the tuple, `(dx,dy)` represent the value that when added to a cell with coordinate `(x,y)` equals to the coordinate `(x+dx,y+dy)` of the new cell, when we take one step in the given DIR (index of the array tells the direction). For example, we are at coord (0,0) and we need to take a step in the EAST direction. EAST is the second element of the array and is equal to (1, 0). So the change in x-direction is 1 and the change in y-direction is 0. The new coordinate after moving 1 cell EAST is `(0,0) + (1,0) = (1,0)`.
 - dir.py/get_direction(first,second): A function that accepts two coords and calculates the direction that the second coord is in from the first. The direction will be normalised to a unit value. Assume we only move in 4 directions, N-E-S-W.
 - maze.py/Maze
   - A maze class to represent a single maze instance.
   - A maze stores a list of cells. The values of the cell correspond to the walls the cell has i.e. if the 1st element of the list is 0b1000, the cell #1 i.e. the cell at (1,0) has a wall in the North side.
   - The maze also stores the no. of rows and cols as the 'height' and 'width' data member.
-  - The list index is mapped to the 2d coord using the bijective function `(row,col) --> row * width + col`, and vice versa: `coord --> (coord // width, coord % width)`.
-  - The maze provides functions to add and remove walls from a cell identified by a coordinate (row, column). The set_cell and get_cell functions internally update the encoding of the cell in the array to match with the state of the maze. There are several other functions that are useful, such as the `is_valid_coord` function which checks if a coord is contained in the maze.
+  - The list index is mapped to the 2d coord using the bijective function `index(row,col) = row * width + col`, and vice versa: `coord(index) --> (index // width, index % width)`.
+  - The maze provides functions to add and remove walls from a cell identified by a coordinate (row, column). The class will internally update the encoding of the cell in the array to match with the state of the maze. There are several other functions that are useful, such as the `is_valid` function which checks if a coord is contained in the maze.
   - The encode function can convert the array into an encoded form, that is used by the backend to send as a response.
 - mg.py/MazeGenerator:
   - Base class for maze generators.
   - creates a maze instance in the constructor
   - all subclasses override the create() function which returns a maze
+- The `expandIntoLargerMaze` function added in the random_mg.py module (not part of the maze package), is another useful function that puts a maze inside a bigger maze by filling the extra cells with empty space.
 
 ## Coordinate System
 
@@ -151,9 +145,33 @@ Our middleware does the following validation on each request to `/generateSegmen
 - We are currently developing a form for Server registration. Currently, this is a manual process, as we update the server data within the Mongo Shell. We want to create this form for everyone to add their maze generators to our database. In our middleware we will make a validation check by requesting a sample maze segment from this new server. If it follows the format correctly and does not throw a error, we can proceed to add it to the database. This will take care of spam servers being added. We do need to increase security on this route as people could add any kind of URL that can contain malware.
 - A complementary page we are also developing is the /servers page that will display all of the servers in the database. This will be like a Admin page where we can quickly make changes to the servers such as EDIT and DELETE. We will add a middleware route to view this page but it will only allow users if they have the correct 'user role'.
 
-Demo server page
+## Server page
+
+- Route: `/servers`
+- Methods: GET
+- Template: `servers.html`
+
+Notes
+
+The server route simply fetches all servers and formats the output in a html page as a table. We also have two actions: 'Edit' and 'Delete'. These are presented as links to `/server/edit/:id` and `/server/delete/:id`, which we dynamically set while rendering the page. The edit route takes us to the registration page (described next) and the delete route simply deletes the server from the database and redierects back to the current page.
+
+Screenshot
 
 ![server page](resources/server-page.png)
+
+## Register and Edit Server
+
+- Route: `/server-registration`
+- Methods: GET, POST
+- Template: `server-registration.html`
+
+Notes
+
+We use a hidden input containing the id of the server for this page. If the POST request sends back this value on submit, we update the server; else, we create a new server. Secondly, we update the timestamps of the server. In particular, the two fields are 'date_modified' and 'date_created'. These are set to the current time on creation and only the date_modified is set to the current time on update (date_created not changed in latter case).
+
+Screenshot
+
+![register server page](resources/register-server-page.png)
 
 ## Authentication
 
