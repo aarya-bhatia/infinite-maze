@@ -1,5 +1,9 @@
 # Maze Generators
 
+The following information explains the classes and modules used for this project.
+
+For our backend, we follow an OOP approach to desgin. We have created a base "maze" package containing some helper modules and a "MazeGenerator" base class that all maze generators override.
+
 We have two maze generators called 'Custom Maze Generator' and 'Random Maze Generator'. Earlier the 'Custom Maze Generator' was called 'Letter Maze Generator' (if you spot this on any documentation), but we extended our class into a more dynamic version of itself and renamed is Custom Maze Generator! Both our maze generators share modules defined in the 'maze' directory. We have copied this directory into both of our maze generator's directories. This package contains the modules 'ccord.py', 'dir.py', 'dset.py', 'maze.py' and 'mg.py' which are at the bottom of this page. The next section will explain our maze generators.
 
 ## Custom Maze Generator
