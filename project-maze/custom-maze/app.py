@@ -1,5 +1,5 @@
 from random import randint
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from custom_mg import CustomMazeGenerator
 
 app = Flask(__name__)
@@ -48,10 +48,13 @@ letter_maps = [
 
 @app.route('/', methods=["GET"])
 def GET_maze_segment():
+    height = request.args.get('height') or 7
+    width = request.args.get('width') or 7
+
     letter_map = letter_maps[randint(0, len(letter_maps)-1)]
 
     maze = CustomMazeGenerator(
-        height=7, width=7, letter_map=letter_map).create()
+        height=height, width=width, letter_map=letter_map).create()
     print(maze.encode())
 
     return jsonify({"geom": maze.encode()}), 200

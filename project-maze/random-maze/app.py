@@ -1,5 +1,5 @@
 from random import randint
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from maze.maze import *
 from maze.coord import *
 from maze.dir import *
@@ -13,8 +13,9 @@ max_size = 7
 
 @app.route('/', methods=["GET"])
 def GET_maze_segment():
-    height = randint(min_size, max_size)
-    width = randint(min_size, max_size)
+    height = request.args.get('height') or randint(min_size, max_size)
+    width = request.args.get('width') or randint(min_size, max_size)
+
     maze = RandomMazeGenerator(height, width).create()
 
     print(f"height:{height}, width:{width}")

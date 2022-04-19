@@ -14,8 +14,11 @@ load_dotenv()
 
 servers = []
 
+active_users = []
+
 EMAIL_REGEX = re.compile(r"[^@\s]+@[^@\s]+\.[a-zA-Z0-9]+$")
 USERNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
+
 
 try:
     mongo = MongoClient('localhost', 27017)

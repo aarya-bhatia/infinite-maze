@@ -6,7 +6,7 @@ y = 0;
 
 (minX = 0), (maxX = 0), (minY = 0), (maxY = 0);
 
-requestGrid = (requestX, requestY) => {
+function requestGrid(requestX, requestY) {
   console.log(`RequestGrid(${requestX}, ${requestY})`);
   $.get("/generateSegment")
     .done(function (data) {
@@ -43,9 +43,9 @@ requestGrid = (requestX, requestY) => {
     .fail(function (data) {
       $("#maze").html(`<hr><h3>Error</h3><p>${JSON.stringify(data)}</p>`);
     });
-};
+}
 
-expandGrid = (dX, dY) => {
+function expandGrid(dX, dY) {
   if (dX == 1) {
     requestGrid(x, y - 3);
   }
@@ -58,9 +58,9 @@ expandGrid = (dX, dY) => {
   if (dY == -1) {
     requestGrid(x - 3, y - 6);
   }
-};
+}
 
-move = (dX, dY) => {
+function move(dX, dY) {
   $(`.w[data-x=${x}][data-y=${y}]`).html("");
   x += dX;
   y += dY;
@@ -72,9 +72,9 @@ move = (dX, dY) => {
   }
 
   $(`.w[data-x=${x}][data-y=${y}]`).html("<span>&#9679;</span>");
-};
+}
 
-document.onkeydown = (e) => {
+document.onkeydown = function (e) {
   let sq = parseInt(grid[x][y], 16);
   let wallNorth = sq & 8;
   let wallEast = sq & 4;
@@ -92,7 +92,7 @@ document.onkeydown = (e) => {
   }
 };
 
-let renderGrid = () => {
+function renderGrid() {
   html = "";
   console.log(`${minX} - ${maxX} -> ${minY} - ${maxY}`);
   for (let curY = minY; curY <= maxY; curY++) {
@@ -110,7 +110,7 @@ let renderGrid = () => {
     html += `</div>`;
   }
   $("#maze").html(html);
-};
+}
 
 $(() => {
   requestGrid(-3, -3);
