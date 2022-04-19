@@ -82,8 +82,25 @@ def expandIntoLargerMaze(maze: Maze, new_height, new_width):
 
     for row in range(maze.height):
         for col in range(maze.width):
-            new_maze.cells[new_maze.index(
-                Coord(row + y_off, col + x_off))] = maze.cells[maze.index(Coord(row, col))]
+            inner_maze_idx = maze.index(Coord(row, col))
+            outer_maze_idx = new_maze.index(Coord(row + y_off, col + x_off))
+            new_maze.cells[outer_maze_idx] = maze.cells[inner_maze_idx]
+
+            # if row == 0 and maze.cells[inner_maze_idx] & (1 << NORTH) != 0:
+            #     neighbor_coord = Coord(row + y_off - 1, col + x_off)
+            #     new_maze.cells[new_maze.index(neighbor_coord)] |= (1 << SOUTH)
+
+            # if col == 0 and maze.cells[inner_maze_idx] & (1 << WEST) != 0:
+            #     neighbor_coord = Coord(row + y_off, col + x_off - 1)
+            #     new_maze.cells[new_maze.index(neighbor_coord)] |= (1 << EAST)
+
+            # if row == maze.height-1 and maze.cells[inner_maze_idx] & (1 << SOUTH) != 0:
+            #     neighbor_coord = Coord(row + y_off + 1, col + x_off)
+            #     new_maze.cells[new_maze.index(neighbor_coord)] |= (1 << NORTH)
+
+            # if col == maze.width-1 and maze.cells[inner_maze_idx] & (1 << EAST) != 0:
+            #     neighbor_coord = Coord(row + y_off, col + x_off + 1)
+            #     new_maze.cells[new_maze.index(neighbor_coord)] |= (1 << WEST)
 
     return new_maze
 
