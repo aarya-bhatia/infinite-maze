@@ -57,4 +57,6 @@ def GET_maze_segment():
         height=height, width=width, letter_map=letter_map).create()
     print(maze.encode())
 
-    return jsonify({"geom": maze.encode()}), 200
+    response = jsonify({"geom": maze.encode()})
+    response.headers["Cache-Control"] = 'no-store'
+    return response, 200

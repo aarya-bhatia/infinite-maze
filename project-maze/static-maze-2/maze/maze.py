@@ -1,5 +1,6 @@
+from math import sqrt
 from maze.coord import Coord
-from maze.dir import dir_vec_arr, get_direction
+from maze.dir import dir_vec_arr, get_direction, NORTH, SOUTH, EAST, WEST
 
 
 class Maze:
@@ -98,3 +99,29 @@ class Maze:
             res.append(s)
 
         return res
+
+    def is_exterior(self, coord: Coord):
+        """Checks if the given coord lies on the exterior part of the maze"""
+        return coord.row == 0 or coord.row == self.height - 1 or coord.col == 0 or coord.col == self.width - 1
+
+    def get_distance(self, u: Coord, v: Coord):
+        """Returns Euclidean Distance between given coords"""
+        return sqrt((v.row - u.row)**2 + (v.col - u.col)**2)
+
+    def get_closest_edge_dir(self, coord: Coord):
+        """Finds the direction in which the boundary of the maze is closest to the given coord"""
+        north = self.get_distance(Coord(0, coord.col), coord)
+        south = self.get_distance(Coord(self.height - 1, coord.col), coord)
+        west = self.get_distance(Coord(coord.row, 0), coord)
+        east = self.get_distance(Coord(coord.row, self.width - 1), coord)
+
+        min_dist = min([north, south, west, east])
+
+        if min_dist == north:
+            return NORTH
+        elif min_dist == south:
+            return SOUTH
+        elif min_dist == east:
+            return EAST
+        else:
+            return WEST

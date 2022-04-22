@@ -19,6 +19,7 @@ active_users = []
 EMAIL_REGEX = re.compile(r"[^@\s]+@[^@\s]+\.[a-zA-Z0-9]+$")
 USERNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
 
+serverCache = {}
 
 try:
     mongo = MongoClient('localhost', 27017)
@@ -247,6 +248,8 @@ def GET_maze_segment():
     num_rows = '7'
     num_cols = '7'
 
+    print("Cache:" + str(serverCache))
+
     if not servers:
         docs = db.servers.find({"status": "available"})
 
@@ -265,6 +268,17 @@ def GET_maze_segment():
             continue
 
         try:
+            serverId = str(server["_id"])
+
+            if serverId in serverCache:
+                serverData = serverCache[serverId]
+                delta = datetime.now() - datetime(serverData["Date"])
+                print(serverData.headers)
+
+                if int(serverData["age"]) < int(serverData["max-age"]):
+                    serverData["Age"] = delta.total_seconds()
+                    return {"geom": serverData["geom"]}, 200
+
             response = requests.get(url)
 
             if response.status_code == 200:
@@ -274,9 +288,21 @@ def GET_maze_segment():
                     grid = response["geom"]
 
                     if util.validate_grid(num_rows, num_cols, grid):
-                        return {"geom": response["geom"]}
+
+                        # check if maze is static
+                        print(response.headers)
+
+                        serverCache[serverId] = {
+                            "geom": response["geom"],
+                            "Date": datetime.now(),
+                            "Age": response.headers["Age"],
+                            "max-age": response.headers["max-age"]
+                        }
+
+                        return {"geom": response["geom"]}, 200
         except:
-            db.servers.update_one({"_id": ObjectId(server["_id"])}, {
-                                  "$set": {"status": "error"}})
+            # db.servers.update_one({"_id": ObjectId(server["_id"])}, {
+            #                       "$set": {"status": "error"}})
+            pass
 
     return {"error": "No servers are available"}, 500

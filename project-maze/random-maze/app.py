@@ -23,4 +23,6 @@ def GET_maze_segment():
 
     maze = expandIntoLargerMaze(maze, 7, 7)
 
-    return jsonify({"geom": maze.encode()}), 200
+    response = jsonify({"geom": maze.encode()})
+    response.headers["Cache-Control"] = 'no-store'
+    return response, 200
