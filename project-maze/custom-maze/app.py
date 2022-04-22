@@ -59,4 +59,5 @@ def GET_maze_segment():
 
     response = jsonify({"geom": maze.encode()})
     response.headers["Cache-Control"] = 'no-store'
+
     return response, 200

@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from random import randint
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, render_template_string, request, session
+from flask import Flask, redirect, render_template, request, session, jsonify
 from pymongo import MongoClient
 import util
 import requests
@@ -18,6 +18,7 @@ active_users = []
 
 EMAIL_REGEX = re.compile(r"[^@\s]+@[^@\s]+\.[a-zA-Z0-9]+$")
 USERNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
+HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 serverCache = {}
 
@@ -245,11 +246,15 @@ def GET_index():
 @ app.route('/generateSegment', methods=["GET"])
 def GET_maze_segment():
     """Route for maze generation"""
+    global servers
+    global serverCache
+
     num_rows = '7'
     num_cols = '7'
 
-    print("Cache:" + str(serverCache))
+    print("Server Cache => " + str(serverCache))
 
+    # If server list is empty, it will be filled with available servers that are fetched from the database
     if not servers:
         docs = db.servers.find({"status": "available"})
 
@@ -257,6 +262,7 @@ def GET_maze_segment():
             for server in docs:
                 servers.append(server)
 
+    # Randomly choose servers from the list till a valid one is found
     while len(servers) > 0:
         r = randint(0, len(servers)-1)
         server = servers[r]
@@ -270,39 +276,78 @@ def GET_maze_segment():
         try:
             serverId = str(server["_id"])
 
+            # If the cache exists for current server, do not request to it again
             if serverId in serverCache:
-                serverData = serverCache[serverId]
-                delta = datetime.now() - datetime(serverData["Date"])
-                print(serverData.headers)
+                cache = serverCache[serverId]
 
-                if int(serverData["age"]) < int(serverData["max-age"]):
-                    serverData["Age"] = delta.total_seconds()
-                    return {"geom": serverData["geom"]}, 200
+                now = datetime.now(tz=timezone.utc)
 
+                prevDate = cache['date']
+                timeElapsed = now - prevDate
+
+                print("Time Elapsed: " + str(timeElapsed))
+
+                cache['date'] = now
+                cache["age"] = cache['age'] + int(timeElapsed.total_seconds())
+
+                if cache['age'] <= cache['max-age']:
+                    print("HIT")
+                    print(cache)
+
+                    return jsonify({"geom": cache['geom']}), 200
+                else:
+                    # Cache has expired
+                    del serverCache[serverId]
+
+            # Make request to Maze Generator Server
             response = requests.get(url)
 
+            print(response)
+
             if response.status_code == 200:
-                response = response.json()
+                content = response.json()
 
-                if "geom" in response:
-                    grid = response["geom"]
+                if "geom" in content:
+                    geom = content["geom"]
 
-                    if util.validate_grid(num_rows, num_cols, grid):
-
-                        # check if maze is static
+                    if util.validate_grid(num_rows, num_cols, geom):
                         print(response.headers)
 
-                        serverCache[serverId] = {
-                            "geom": response["geom"],
-                            "Date": datetime.now(),
-                            "Age": response.headers["Age"],
-                            "max-age": response.headers["max-age"]
+                        # check if maze is static
+                        if "Cache-Control" not in response.headers or response.headers["Cache-Control"] == 'no-store':
+                            return {"geom": geom}, 200
+
+                        date = response.headers["Date"]
+                        if date:
+                            date = datetime.strptime(
+                                date, HTTP_DATE_FORMAT).replace(tzinfo=timezone.utc)
+                        else:
+                            date = datetime.now(tz=timezone.utc)
+
+                        age = response.headers["Age"]
+                        cacheControl = response.headers["Cache-Control"].strip().split(
+                            ",")
+                        maxAge = 0
+
+                        for keyValue in cacheControl:
+                            if len(keyValue) > 0 and keyValue.split('=')[0] == 'max-age':
+                                maxAge = keyValue.split('=')[1]
+
+                        cache = {
+                            "date": date,
+                            "max-age": int(maxAge),
+                            "age": int(age),
+                            "geom": geom
                         }
 
-                        return {"geom": response["geom"]}, 200
-        except:
-            # db.servers.update_one({"_id": ObjectId(server["_id"])}, {
-            #                       "$set": {"status": "error"}})
-            pass
+                        # save cache
+                        serverCache[serverId] = cache
 
-    return {"error": "No servers are available"}, 500
+                        return jsonify({"geom": geom}), 200
+        except:
+            print("Error with Server: " + server["URL"])
+            # db.servers.update_one({"_id": ObjectId(server["_id"])}, {"$set": {"status": "error"}})
+
+    return jsonify({"error": "No servers are available"}), 500
+
+# @app.route('/getCache')

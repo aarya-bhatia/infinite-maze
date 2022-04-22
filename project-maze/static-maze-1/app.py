@@ -7,6 +7,8 @@ from maze.maze import *
 
 app = Flask(__name__)
 
+count = 0
+cache = None
 http_date_format = "%a, %d %b %Y %H:%M:%S GMT"
 
 # pattern = [
@@ -57,9 +59,6 @@ def get_maze():
     return maze
 
 
-count = 0
-
-
 @app.route('/', methods=["GET"])
 def GET_maze_segment():
     global count
@@ -74,9 +73,6 @@ def GET_maze_segment():
     response.headers["Age"] = 0
 
     return response, 200
-
-
-cache = None
 
 
 @app.route('/test', methods=['GET'])
@@ -104,25 +100,26 @@ def test():
     if response.status_code == 200:
         # print(response.headers)
 
-        date = response.headers["Date"]
-        date = datetime.strptime(
-            date, http_date_format).replace(tzinfo=timezone.utc)
-
-        age = response.headers["Age"]
-
-        cacheControl = response.headers["Cache-Control"].strip().split(",")
-
-        maxAge = 0
-
-        for keyValue in cacheControl:
-            if len(keyValue) > 0 and keyValue.split('=')[0] == 'max-age':
-                maxAge = keyValue.split('=')[1]
-
         data = response.json()
         geom = []
 
         if "geom" in data:
             geom = data["geom"]
+
+        if "Cache-Control" not in response.headers or response.headers["Cache-Control"] == 'no-store':
+            return {"geom": geom}, 200
+
+        date = response.headers["Date"]
+        date = datetime.strptime(
+            date, http_date_format).replace(tzinfo=timezone.utc)
+
+        age = response.headers["Age"]
+        cacheControl = response.headers["Cache-Control"].strip().split(",")
+        maxAge = 0
+
+        for keyValue in cacheControl:
+            if len(keyValue) > 0 and keyValue.split('=')[0] == 'max-age':
+                maxAge = keyValue.split('=')[1]
 
         cache = {
             "date": date,
