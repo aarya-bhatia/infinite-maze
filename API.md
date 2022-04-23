@@ -232,4 +232,22 @@ View image gallery: [Image Gallery](README.md)
 
 ## Implemented Advanced Features
 
-Todo
+### Maze Footprints Feature
+
+We developed a method to track the footprints of a user in the maze. Our approach relies on the frontend and the middleware. We assume that on every step in the maze that a user will take, the frontend will make an ajax request to the route /move with the following data in the query string:
+
+- maze_id
+- x
+- y
+
+We already contain our mazes in the database, so we add a field called "steps" to the mazes collection which contains a list of coordinates that should contain the footprint. Therefore, when the middleware sends back aa maze for the first time to the client, it will also send the "steps" array. The frontend can render the footprints in the corresponding (x,y) coordinates within the maze with this data.a The exact format of the maze object would be:
+
+```{}
+{
+  "steps": [
+    {"x": 0, "y": 0},
+    ...
+  ],
+  ...
+}
+```

@@ -379,3 +379,15 @@ def GET_maze_segment():
 @app.route('/locals', methods=['GET'])
 def GET_locals():
     return jsonify({"cache": serverCache, "hit_count": CACHE_HIT_COUNT, "frequency": serverFrequency}), 200
+
+
+@app.route('/move', methods=['GET'])
+def GET_moveUser():
+    maze_id = request.args.get('maze_id')
+    x = request.args.get('x')
+    y = request.args.get('y')
+
+    db.mazes.update_one({"_id": ObjectId(maze_id)}, {
+                        "$push": {"steps": {"x": x, "y": y}}})
+
+    return "", 200
