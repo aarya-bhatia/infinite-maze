@@ -60,3 +60,45 @@ Testing:
 We have a test_maze.py file to test the maze and test conversion functions for 1d to 2d indexing of cells.
 
 ![Tests screenshot](resources/maze-tests.png)
+
+## Static Mazes
+
+## Static Maze 1
+
+The mg under the folder 'project-maze/static-maze-1' is a maze that always generates a snake like pattern. We iteratively create the following pattern:
+
+```{}
+..xxxxx
+...xxxx
+x...xxx
+xx...xx
+xxx...x
+xxxx...
+xxxxx..
+```
+
+This grid encodes our maze, such that for any 'dot' we add a wall on all 4-sides of that coord, if there is an 'x', in the pattern.
+
+## Static Maze 2
+
+```{}
+[
+  [0, 0, 0, 0, 0, 0, 0],
+  [0, 0xf, 0, 0, 0, 0xf, 0],
+  [0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0],
+  [0, 0xf, 0, 0, 0, 0xf, 0],
+  [0, 0, 0, 0, 0, 0, 0],
+]
+```
+
+This maze is represented by the layout shown above. Each of the 0xf represent a block, surrounded by walls on each side. The resulting maze only has 4 small blocks on each side and the rest of the maze is blank.
+
+## Age-Based Caching
+
+Our static mgs attach the following headers in each request (Screenshot from Postman)
+
+![screenshot](resources/postman-headers.png)
+
+Our middleware maintains a local cache of all static servers that are still fresh. When a static maze is picked by the middleware to generate a maze, we check if there is a key equal to that server's database ID in our cache (dictionary). Each id in the cache-dictionary is mapped to another dictionary. If the server exists in the cache, we update the 'date' and 'age' fields of the server data in the cache to the current date and the age is incremented by the time elapsed since the last request, in seconds. We use a datetime object to store the date. The max-age is aa value in seconds (equal to 1 year), after our cache expires we delete it from the dictionary and re-fetch the data from the server.
