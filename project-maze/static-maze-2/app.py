@@ -22,8 +22,13 @@ def GET_maze_segment():
 
     for row in range(7):
         for col in range(7):
-            coord = maze.index(Coord(row, col))
-            maze.cells[coord] = mazeLayout[row][col]
+            coord = Coord(row, col)
+
+            if mazeLayout[row][col] == 0xf:
+                maze.add_wall(coord, 0)
+                maze.add_wall(coord, 1)
+                maze.add_wall(coord, 2)
+                maze.add_wall(coord, 3)
 
     response = jsonify({"geom": maze.encode()})
 
