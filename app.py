@@ -21,6 +21,9 @@ USERNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
 HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
 serverCache = {}
+CACHE_HIT_COUNT = 0
+
+serverFrequency = {}
 
 try:
     mongo = MongoClient('localhost', 27017)
@@ -294,6 +297,10 @@ def GET_maze_segment():
                     print("HIT")
                     print(cache)
 
+                    CACHE_HIT_COUNT += 1
+                    serverFrequency[serverId] = serverFrequency.get(
+                        serverId, 0) + 1
+
                     return jsonify({"geom": cache['geom']}), 200
                 else:
                     # Cache has expired
@@ -315,7 +322,9 @@ def GET_maze_segment():
 
                         # check if maze is static
                         if "Cache-Control" not in response.headers or response.headers["Cache-Control"] == 'no-store':
-                            return {"geom": geom}, 200
+                            serverFrequency[serverId] = serverFrequency.get(
+                                serverId, 0) + 1
+                            return jsonify({"geom": geom}), 200
 
                         date = response.headers["Date"]
                         if date:
@@ -343,6 +352,9 @@ def GET_maze_segment():
                         # save cache
                         serverCache[serverId] = cache
 
+                        serverFrequency[serverId] = serverFrequency.get(
+                            serverId, 0) + 1
+
                         return jsonify({"geom": geom}), 200
         except:
             print("Error with Server: " + server["URL"])
@@ -350,4 +362,7 @@ def GET_maze_segment():
 
     return jsonify({"error": "No servers are available"}), 500
 
-# @app.route('/getCache')
+
+@app.route('/locals', methods=['GET'])
+def GET_locals():
+    return jsonify({"cache": serverCache, "hit_count": CACHE_HIT_COUNT, "frequency": serverFrequency}), 200

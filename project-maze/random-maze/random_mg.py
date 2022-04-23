@@ -15,10 +15,18 @@ class RandomMazeGenerator(MazeGenerator):
         dset = DSet(self.width * self.height)
 
         for index in range(self.maze.size()):
-            self.maze.cells[index] = 0xf
+            coord = self.maze.coord(index)
 
+            # do not add walls to boundary as it would not be closed from the opposite side..
+            # the user would enter through but not leave from such walls
+            if coord.row == 0 or coord.row == self.height - 1 or coord.col == 0 or coord.col == self.width - 1:
+                continue
+
+            for dir in range(4):
+                self.maze.add_wall(coord, dir)
+
+        # Remove walls till maze is connected
         while dset.size(0) < self.maze.size():
-
             currentIndex = randint(0, self.maze.size() - 1)
             currentCoord = self.maze.coord(currentIndex)
 
