@@ -61,11 +61,9 @@ We have a test_maze.py file to test the maze and test conversion functions for 1
 
 ![Tests screenshot](resources/maze-tests.png)
 
-## Static Mazes
-
 ## Static Maze 1
 
-The mg under the folder 'project-maze/static-maze-1' is a maze that always generates a snake like pattern. We iteratively create the following pattern:
+The mg under the folder 'project-maze/static-maze-1' is a maze that always generates a snake like pattern. We iteratively create the following pattern and store this in an array:
 
 ```{}
 ..xxxxx
@@ -97,8 +95,16 @@ This maze is represented by the layout shown above. Each of the 0xf represent a 
 
 ## Age-Based Caching
 
-Our static mgs attach the following headers in each request (Screenshot from Postman)
+Our static mgs attach the following headers in each request. (Please see screenshot below)
 
-![screenshot](resources/postman-headers.png)
+We set age to 0, max-age to number of seconds in 1 year, and the date is set by flask to the current datetime by default.
+
+![Postman Screenshot](resources/postman-headers.png)
 
 Our middleware maintains a local cache of all static servers that are still fresh. When a static maze is picked by the middleware to generate a maze, we check if there is a key equal to that server's database ID in our cache (dictionary). Each id in the cache-dictionary is mapped to another dictionary. If the server exists in the cache, we update the 'date' and 'age' fields of the server data in the cache to the current date and the age is incremented by the time elapsed since the last request, in seconds. We use a datetime object to store the date. The max-age is aa value in seconds (equal to 1 year), after our cache expires we delete it from the dictionary and re-fetch the data from the server.
+
+For dynamic mazes, the server adds a header 'Cache-Control:no-store' so that the Middleware does not attempt to put this in cache. Alternatively, the server can omit the Cache-Control header completely, in which case also the middleware will not put the server in the cache.
+
+Additionally, we created a test route /locals where we return JSON data about the cached servers, a dictionary called frequency which contains the # times each server is used for maze segment, and a variable hit_count which contains the number of times we used a cached result. This screenshot below will also explain the structure of our dictionary used for caches!
+
+![Server Cache JSON](resources/server-cache-json.png)
