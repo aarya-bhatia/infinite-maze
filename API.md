@@ -251,3 +251,11 @@ We already contain our mazes in the database, so we add a field called "steps" t
   ...
 }
 ```
+
+Futhermore, there are 2 more additions we can make- Firstly, each user caan customise their footprint. Maybe eacah footprint can be an icon. Then, we could save their preferences in our db or as a cookie. One potential problem is that if everyone visits a maze, very quickly the entire maze will be covered with footprints. To solve this issue, we could maybe mark a footprint every few steps, like 5 steps, rather than every single steps. That would involve frontend code to make this work. This middleware will simply add the coordinates of the user to the steps array and be done.
+
+### Supporting Multiple Size
+
+As decided in lecutre, we will to stick 7a x 7b, that is, the width and height can be any multiple of 7. In order to ensure the continuity of the mazes, we will always set a entrance and exit at the centre of each side of the 7x7 maze block. So that a 7a x 7b maze would have '2a' exits on its East and West side and '2b' exits on its North and South sides.
+
+Apart from the geom field, our maze generators will be required to add a 'height' and 'width' field to their response. The middleware can pass on this information to the frontend. The middleware will also be required to validate if the maze follows the new rules- exit in the centre on each side of every 7x7 block of the 7a x 7b maze as well as height % 7 == 0 aand width % 7 == 0.
