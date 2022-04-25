@@ -205,19 +205,6 @@ Register Form
   - static/js/index.js: javascript
   - static/favicon_io: favicon and webmanifest
 
-## Coordinate System
-
-We will need to setup a way to identify the mazes that have been generated in the "world". For a new user, the blank screen they start with is their world. Their first request they get a 7x7 maze, which has coordinates from (0,0) to (6,6) within itself. However, for the world, this maze is located at (0,0). If the user finds an exit on the East side and attempts to generate the next maze on the right of the current one, the new maze will have a world coordinate of (1,0). In particular there are four cases.
-
-Suppose we are at coordinates `(worldX,worldY)`. The user can take an exit in one of the 4 directions, and these will be the coordinates for the **new** maze.
-
-- NORTH: `(worldX,worldY-1)`
-- SOUTH: `(worldX,worldY+1)`
-- WEST: `(wordlX-1,worldY)`
-- EAST: `(wordlX+1,worldY)`
-
-As you can see, this is similar to the way the coordinates inside the maze work. So, we have a way to store the maze in a database. And we have a way to load a maze from the database, if it exists. This means all users will be able to see the same maze as our middleware will try to fetch a maze for the given worldX, worldY sent alongwith the http request. If one does not exist, our middleware will generate one, through some server, and insert it to the database. So, all mazes in the database will have to store the world coordinates as a field.
-
 ## More Features
 
 - The frontend is not sending back any data as of now. We would like to keep track of the users real location on the maze and also have some kind of authentication so we can remember where the user last was in the maze.
@@ -232,7 +219,86 @@ View image gallery: [Image Gallery](README.md)
 
 ## Implemented Advanced Features
 
-### Maze Footprints Feature
+### Coordinate System
+
+We will need to setup a way to identify the mazes that have been generated in the "world". For a new user, the blank screen they start with is their world. Their first request they get a 7x7 maze, which has coordinates from (0,0) to (6,6) within itself. However, for the world, this maze is located at (0,0). If the user finds an exit on the East side and attempts to generate the next maze on the right of the current one, the new maze will have a world coordinate of (1,0). In particular there are four cases.
+
+Suppose we are at coordinates `(worldX,worldY)`. The user can take an exit in one of the 4 directions, and these will be the coordinates for the **new** maze.
+
+- NORTH: `(worldX,worldY-1)`
+- SOUTH: `(worldX,worldY+1)`
+- WEST: `(wordlX-1,worldY)`
+- EAST: `(wordlX+1,worldY)`
+
+As you can see, this is similar to the way the coordinates inside the maze work. So, we have a way to store the maze in a database. And we have a way to load a maze from the database, if it exists. This means all users will be able to see the same maze as our middleware will try to fetch a maze for the given worldX, worldY sent alongwith the http request. If one does not exist, our middleware will generate one, through some server, and insert it to the database. So, all mazes in the database will have to store the world coordinates as a field.
+
+## Advanced Feature: Variable Sized Mazes Algorithm
+
+Let us start by defining the basic layout constraints we will follow from now, in order to simplify and ensure continuity of mazes.
+
+- All mazes will have a dimension of 7a x 7b, for some positive integer a and b. We will call each 7x7 block in the maze, 1 **unit** of the maze.
+- Each unit of the maze will have an exit in the centre columns and centre rows on both side. That is, a 7a x 7b maze will exits in coordinates (3x mod 7, 3y mod 7). This way any two units from any maze are connected together.
+
+**Note**: We say two mazes are connected iff there exist a path that will take us from a cell in maze 1 to a cell in maze 2.
+
+Now that we have eliminated the problem of the continuity, let us discuss the next problem. We introduce some restrictions on maximum width and height of a maze to ensure that no two mazes overlap in the world. Our middleware will enforce rules that we will talk about shortly.
+
+Let us explain the data structure that we will build, to describe the layout of the world. We will define a large maximum height and width of the entire world, that all mazes will be contained in. Let's say 1000 units x 1000 units. This region will be represented as a root node of a 4-ary tree. Any region inside this region will be a root node of a subtree. Each maze will be a **Node** of this tree. Furthermore, every region can be subdivided into 4 regions: North West (NW), North East (NE), South West (SW), South East (SE). Lastly, each node will contain a single maze apart from the 4 children nodes.
+
+**Def**. World Tree - The root node of the entire 4-ary tree. This is a top level root node but this alone does not contain any mazes. Every maze will be derived from this node. In a sense, this is the world, and every region inside this world will be some subtree of the world tree.
+
+We will always follow one rule for consistency - that all mazes are always inserted in the NW region of the current region.
+
+For example, we create a node 'A', subdividing the world tree into 4 nodes. This node 'A' is the NW child node and it's width and height are determined by the width and height of the immediate subtree that is present in. For A, the immediate subtree is the whole tree, so it can have any size it wants. So, we have 4 regions in the world, correponding the 4 child nodes of the Root Node of the Tree. Only the NW node is occupied (by A) and the other 3 are **free**.
+
+**Def**. Free Node - A node that does not contain a maze. It is a node available for maze storage.
+
+Some definitions:
+
+- **current node**: This is the node that we are currently in, that contains the maze.
+- **exit direction**: This is the direction to move in to the next maze from the current maze. This value is provided by the frontend as a query parameter.
+- **target node**: This is the node that the next maze would be contained inside. This could be None.
+
+You can understand with the help of the following diagram:
+
+![image](resources/drawio_1.png)
+
+The following examples will explain the concept of current nodes, exit directions and target nodes.
+
+Suppose we are at the centre block. We could be in any 4 regions - NE,NW,SE,SW. Depending on the exit direction, we would move to another region in the current block or a block on the outside.
+
+For example, if we are NW and the exit direction is East, the target node is NE. But if the exit direction is West, we would move to the North East region of the adjacent west region. This will lie in a node that is a child of the current region's parent. It will be the inner most NE child of the region that is west of the current region.
+
+We need an algorithm to find out this target node. Once we have the target node, our job is simple. We request the MG to create a maze such that the maze width and height is less than the width and height of the target node's. Then, we subdivide the target node if we need to, and add 4 child nodes to the target node. Therefore, the target node becomes a subtree which contains a maze in the NW child at this time.
+
+We can describe our data structure in the module `tree.py` with a class callled 'Node'. This node class stores a maze, 4 child nodes and a parent Node.
+
+With knowledge of the current node and exit direction we can determine the target node. We create a function called find_available_subtree() to do so. This function needs to determine the current region and the region of the target node. This is a matter of considering many cases (8 cases), one for each of the 4 regions and for each of the 4 directions.
+
+For a given maze, the current node is the node that contains the maze. The exit-direction is the direction in which the user wants to move, i.e. exit into the next maze. Our algorithm will determine the closest node that is in the exit-direction from the current node. With this information, we know the constraint for the size of the next maze. The target node is that node which is in the direction of the exit from the current node and is available, so it does not contain another maze.
+
+The new maze must lie within the target node. However, if there is no such node, it could mean either of these things:
+
+- We have hit the boundary of our world. We must extend the world or simply block the user from going further.
+- There exists another maze in this direction. It is the job of the middleware to discover this node and return the target maze. This situation would not occur if that maze is already in memory in the frontend. However, it might happen if we are loading mazes from the database and starting a new session.
+
+## Multiple Size Support for the MGs
+
+Apart from the geom field, our maze generators will be required to add a 'height' and 'width' field to their response. The middleware can pass on this information to the frontend. The middleware will also be required to validate if the maze follows all rules:
+
+- The height and width will be less or equal to the provided width and height.
+- There is an exit in the centre on each maze unit
+- The maze width and height is a multiple of 7.
+
+The maze generators will also update the _WorldTree_ data structure we explained in the previous section.
+
+Our maze generators will accept query params 'height' and 'width' supplied by the middleware to ask for a specific size maze.
+
+The full URL of the mg would look like `http://localhost:24000?height=7&width=7`. The middleware can request the MG by providing the maximum width and height if needed. If there is no constraint, the MG can choose its width or height.
+
+More Advanced Features...
+
+## Maze Footprints Feature
 
 We developed a method to track the footprints of a user in the maze. Our approach relies on the frontend and the middleware. We assume that on every step in the maze that a user will take, the frontend will make an ajax request to the route /move with the following data in the query string:
 
@@ -254,8 +320,39 @@ We already contain our mazes in the database, so we add a field called "steps" t
 
 Futhermore, there are 2 more additions we can make- Firstly, each user caan customise their footprint. Maybe eacah footprint can be an icon. Then, we could save their preferences in our db or as a cookie. One potential problem is that if everyone visits a maze, very quickly the entire maze will be covered with footprints. To solve this issue, we could maybe mark a footprint every few steps, like 5 steps, rather than every single steps. That would involve frontend code to make this work. This middleware will simply add the coordinates of the user to the steps array and be done.
 
-### Supporting Multiple Size
+## Multiple Users
 
-As decided in lecutre, we will to stick 7a x 7b, that is, the width and height can be any multiple of 7. In order to ensure the continuity of the mazes, we will always set a entrance and exit at the centre of each side of the 7x7 maze block. So that a 7a x 7b maze would have '2a' exits on its East and West side and '2b' exits on its North and South sides.
+To store our generaated mazes our frontend will add the following query param to the route for the middleware: `http://localhost:5000/generateSegment?x=0&y=0`. The x and y will be 0 by default, but the frontend is responsible to update the x and y to the correct value based on the coordinate system defined before. Our middleware can check if there exists a maze in the database with the given coordinates. If there is one, we will **not** generate a new maze. Else, we will.
 
-Apart from the geom field, our maze generators will be required to add a 'height' and 'width' field to their response. The middleware can pass on this information to the frontend. The middleware will also be required to validate if the maze follows the new rules- exit in the centre on each side of every 7x7 block of the 7a x 7b maze as well as height % 7 == 0 aand width % 7 == 0.
+Pseudocode:
+
+```{python}
+x = request.args.get('x') or 0
+y = request.args.get('y') or 0
+
+maze = db.mazes.find_one({"x": x, "y": y})
+
+if maze:
+  return jsonify({"geom": maze["geom"]}), 200
+
+# Generate maze from MG
+# ...
+
+response = requests.get(MG_URL)
+json_body = response.json()
+
+# Save maze to DB
+
+maze = db.mazes.insert_one({
+  "geom": json_body["geom"],
+  "x": x,
+  "y": y,
+  # other data
+}):
+
+if maze:
+  return jsonify({"geom": maze["geom"]}), 200
+
+return "", 500
+
+```

@@ -276,7 +276,19 @@ def GET_maze_segment():
     if not servers:
         get_servers()
 
-    # Randomly choose servers from the list till a valid one is found
+    # Get maze coordinates
+
+    x = request.args.get('x') or 0
+    y = request.args.get('y') or 0
+
+    maze = db.mazes.find_one({"x": x, "y": y})
+
+    if maze:
+        return jsonify({"geom": maze["geom"]}), 200
+
+    # Generate Maze
+
+    # Pick MG: randomly choose servers from the list till a valid one is found
     while len(servers) > 0:
         r = randint(0, len(servers)-1)
         server = servers[r]
@@ -338,6 +350,15 @@ def GET_maze_segment():
                             serverFrequency[serverId] = serverFrequency.get(
                                 serverId, 0) + 1
                             print("Using dynamic maze generator: " + url)
+
+                            db.mazes.insert_one({
+                                "geom": geom,
+                                "url": server["url"],
+                                "server_id": server["_id"],
+                                "x": x,
+                                "y": y
+                            })
+
                             return jsonify({"geom": geom}), 200
 
                         date = response.headers["Date"]
@@ -361,13 +382,35 @@ def GET_maze_segment():
                             "date": date,
                             "max-age": int(maxAge),
                             "age": int(age),
-                            "geom": geom
+                            "geom": geom,
+                            "x": x,
+                            "y": y
                         }
 
                         serverFrequency[serverId] = serverFrequency.get(
                             serverId, 0) + 1
 
+                        db.mazes.insert_one({
+                            "geom": geom,
+                            "url": server["url"],
+                            "server_id": server["_id"],
+                            "x": x,
+                            "y": y
+                        })
+
                         return jsonify({"geom": geom}), 200
+
+                    # Invalid grid format
+                    else:
+                        pass
+
+                # 'geom' key not present
+                else:
+                    pass
+
+            # status code != 200
+            else:
+                pass
         except:
             print("Error with Server: " + server["URL"])
             db.servers.update_one({"_id": ObjectId(server["_id"])}, {

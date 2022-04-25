@@ -12,6 +12,7 @@ max_size = 7
 
 
 @app.route('/', methods=["GET"])
+@app.route('/generate', methods=["GET"])
 def GET_maze_segment():
     height = request.args.get('height') or randint(min_size, max_size)
     width = request.args.get('width') or randint(min_size, max_size)
