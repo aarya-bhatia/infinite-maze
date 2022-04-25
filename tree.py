@@ -51,6 +51,12 @@ class Node:
 
         return None
 
+    def get_innermost_chlld(self, region):
+        child = None
+        while self.has_child(region):
+            child = child.get_child(region)
+        return child
+
     def has_child(self, region):
         if self.get_child(region):
             return True
@@ -58,8 +64,17 @@ class Node:
         return False
 
 
-def find_available_subtre():
-    pass
+def find_available_subtree(current_node: Node, exit_dir: str) -> Node:
+    """TODO"""
+
+    if not current_node.parent:
+        return None
+
+    parent = current_node.parent
+
+    current_region = current_node.find_region()
+
+    return None
 
 
 root = Node(None)  # Tree
