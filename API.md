@@ -225,25 +225,35 @@ Let us start by defining the basic layout constraints we will follow from now, i
 - All mazes will have a dimension of 7a x 7b, for some positive integer a and b. We will call each 7x7 block in the maze, 1 **unit** of the maze.
 - Each unit of the maze will have an exit in the centre columns and centre rows on both side. That is, a 7a x 7b maze will exits in coordinates (3x mod 7, 3y mod 7). This way any two units from any maze are connected together.
 
-**Note**: We say two mazes are connected iff there exist a path that will take us from a cell in maze 1 to a cell in maze 2.
-
 Now that we have eliminated the problem of the continuity, let us discuss the next problem. We introduce some restrictions on maximum width and height of a maze to ensure that no two mazes overlap in the world. Our middleware will enforce rules that we will talk about shortly.
 
-Let us explain the data structure that we will build, to describe the layout of the world. We will define a large maximum height and width of the entire world, that all mazes will be contained in. Let's say 1000 units x 1000 units. This region will be represented as a root node of a 4-ary tree. Any region inside this region will be a root node of a subtree. Each maze will be a **Node** of this tree. Furthermore, every region can be subdivided into 4 regions: North West (NW), North East (NE), South West (SW), South East (SE). Lastly, each node will contain a single maze apart from the 4 children nodes.
+Let us explain the data structure that we will build, to describe the layout of the world. We will define a large maximum height and width of the entire world, that all mazes will be contained in. Let's say 1000 units x 1000 units. This region will be represented as a root node of a 4-ary tree. Any region inside this region will be a root node of a subtree. Each maze will contained inside some **Node** of this tree. Furthermore, every region can be subdivided into 4 regions: North West (NW), North East (NE), South West (SW), South East (SE). Lastly, each node will contain a single maze only.
 
-**Def**. World Tree - The root node of the entire 4-ary tree. This is a top level root node but this alone does not contain any mazes. Every maze will be derived from this node. In a sense, this is the world, and every region inside this world will be some subtree of the world tree.
+Our class called Node has the following data members:
+
+```{}
+Node:
+  - Node north_west
+  - Node north_east
+  - Node south_west
+  - Node north_east
+  - Maze maze
+  - Node parent
+
+```
+
+Some definitions we will use to talk about the maze.
+
+- **Connectivity**: We say two mazes are connected iff there exist a path that will take us from a cell in maze 1 to a cell in maze 2.
+- **World Tree** - The root node of the entire 4-ary tree. This is a top level root node but this alone does not contain any mazes. Every maze will be derived from this node. In a sense, this is the world, and every region inside this world will be some subtree of the world tree.
+- **Free Node** - A node that does not contain a maze. It is a node available for maze storage.
+- **current node**: This is the node that we are currently in, that contains the maze.
+- **exit direction**: This is the direction to move in to the next maze from the current maze. This value is provided by the frontend as a query parameter.
+- **target node**: This is the node that the next maze would be contained inside. This could be None.
 
 We will always follow one rule for consistency - that all mazes are always inserted in the NW region of the current region.
 
 For example, we create a node 'A', subdividing the world tree into 4 nodes. This node 'A' is the NW child node and it's width and height are determined by the width and height of the immediate subtree that is present in. For A, the immediate subtree is the whole tree, so it can have any size it wants. So, we have 4 regions in the world, correponding the 4 child nodes of the Root Node of the Tree. Only the NW node is occupied (by A) and the other 3 are **free**.
-
-**Def**. Free Node - A node that does not contain a maze. It is a node available for maze storage.
-
-Some definitions:
-
-- **current node**: This is the node that we are currently in, that contains the maze.
-- **exit direction**: This is the direction to move in to the next maze from the current maze. This value is provided by the frontend as a query parameter.
-- **target node**: This is the node that the next maze would be contained inside. This could be None.
 
 You can understand with the help of the following diagram:
 
@@ -277,7 +287,7 @@ else:
   return child # inner most child
 ```
 
-Once we have the target node, our job is simple. We request the MG to create a maze such that the maze width and height is less than the width and height of the target node's. Then, we subdivide the target node if we need to, and add 4 child nodes to the target node. Therefore, the target node becomes a subtree which contains a maze in the NW child at this time.
+Once we have the target node, our job is simple. If the target node is None, there is a boundary and we must fail to return a maze. If the target node already contains a maze, we return that maze. Otherwise, we request the MG to create a maze such that the maze width and height is less than the width and height of the target node's. Then, we subdivide the target node if we need to, and add 4 child nodes to the target node. Therefore, the target node becomes a subtree which contains a maze in the NW child at this time.
 
 We can describe our data structure in the module `tree.py` ([here](tree.py)) with a class callled 'Node'. This node class stores a maze, 4 child nodes and a parent Node.
 
@@ -364,7 +374,3 @@ if maze:
 return "", 500
 
 ```
-
-### Experimental
-
-- What if we could transport through mazes? Specifically, we could transport between mazes that are generated by the same servers. to do so, we think we could potentially hide a data-field within the html div that contains each cell. We could store other information here too. However, for this feature we could hide a world X and Y position and an 'action' field. We would need to add a few lines of Javascript on the client to enable the browser to check if there are any data fields and if there are, it can communicate with our middleware. We could create a route to land at a particular coordinate within the world. For example, a route like `/world/x,y` could send the user to a different location in the maze by rerendering the screen or 'changing the camera' of the scene.

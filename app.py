@@ -281,10 +281,10 @@ def GET_maze_segment():
     x = request.args.get('x') or 0
     y = request.args.get('y') or 0
 
-    maze = db.mazes.find_one({"x": x, "y": y})
+    # maze = db.mazes.find_one({"x": x, "y": y})
 
-    if maze:
-        return jsonify({"geom": maze["geom"]}), 200
+    # if maze:
+    #     return jsonify({"geom": maze["geom"]}), 200
 
     # Generate Maze
 
@@ -351,13 +351,13 @@ def GET_maze_segment():
                                 serverId, 0) + 1
                             print("Using dynamic maze generator: " + url)
 
-                            db.mazes.insert_one({
-                                "geom": geom,
-                                "url": server["url"],
-                                "server_id": server["_id"],
-                                "x": x,
-                                "y": y
-                            })
+                            # db.mazes.insert_one({
+                            #     "geom": geom,
+                            #     "url": server["url"],
+                            #     "server_id": server["_id"],
+                            #     "x": x,
+                            #     "y": y
+                            # })
 
                             return jsonify({"geom": geom}), 200
 
@@ -390,13 +390,13 @@ def GET_maze_segment():
                         serverFrequency[serverId] = serverFrequency.get(
                             serverId, 0) + 1
 
-                        db.mazes.insert_one({
-                            "geom": geom,
-                            "url": server["url"],
-                            "server_id": server["_id"],
-                            "x": x,
-                            "y": y
-                        })
+                        # db.mazes.insert_one({
+                        #     "geom": geom,
+                        #     "url": server["url"],
+                        #     "server_id": server["_id"],
+                        #     "x": x,
+                        #     "y": y
+                        # })
 
                         return jsonify({"geom": geom}), 200
 
