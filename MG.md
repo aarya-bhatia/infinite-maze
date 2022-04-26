@@ -1,5 +1,7 @@
 # Maze Generators
 
+Read about the API [here](API.md)
+
 The following information explains the classes and modules used for this project.
 
 For our backend, we follow an OOP approach to desgin. We have created a base "maze" package containing some helper modules and a "MazeGenerator" base class that all maze generators override.

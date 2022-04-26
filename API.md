@@ -1,5 +1,8 @@
 # Infinite Maze API
 
+- [MG and Caching](MG.md)
+- [Advanced Feature](#implemented-advanced-features)
+
 ## Maze Generation
 
 ![maze](resources/im-gallery-1.png)
