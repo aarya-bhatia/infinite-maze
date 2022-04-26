@@ -219,20 +219,7 @@ View image gallery: [Image Gallery](README.md)
 
 ## Implemented Advanced Features
 
-### Coordinate System
-
-We will need to setup a way to identify the mazes that have been generated in the "world". For a new user, the blank screen they start with is their world. Their first request they get a 7x7 maze, which has coordinates from (0,0) to (6,6) within itself. However, for the world, this maze is located at (0,0). If the user finds an exit on the East side and attempts to generate the next maze on the right of the current one, the new maze will have a world coordinate of (1,0). In particular there are four cases.
-
-Suppose we are at coordinates `(worldX,worldY)`. The user can take an exit in one of the 4 directions, and these will be the coordinates for the **new** maze.
-
-- NORTH: `(worldX,worldY-1)`
-- SOUTH: `(worldX,worldY+1)`
-- WEST: `(wordlX-1,worldY)`
-- EAST: `(wordlX+1,worldY)`
-
-As you can see, this is similar to the way the coordinates inside the maze work. So, we have a way to store the maze in a database. And we have a way to load a maze from the database, if it exists. This means all users will be able to see the same maze as our middleware will try to fetch a maze for the given worldX, worldY sent alongwith the http request. If one does not exist, our middleware will generate one, through some server, and insert it to the database. So, all mazes in the database will have to store the world coordinates as a field.
-
-## Advanced Feature: Variable Sized Mazes Algorithm
+### Variable Sized Mazes Algorithm
 
 Let us start by defining the basic layout constraints we will follow from now, in order to simplify and ensure continuity of mazes.
 
